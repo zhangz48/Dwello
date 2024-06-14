@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Dwello</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_auth">Auth Activity</string>
+    <string name="title_activity_navigation_graph">NavigationGraph</string>
+    <string name="title_activity_home_screen">HomeScreen</string>
 </resources>

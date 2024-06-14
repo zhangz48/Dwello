@@ -26,16 +26,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import com.example.dwello.ui.theme.DwelloTheme
 
-val customFontFamily = FontFamily(
-    Font(R.font.cormorant_garamond_regular),
-    Font(R.font.cormorant_garamond_bold, FontWeight.Bold),
-    Font(R.font.cormorant_garamond_medium, FontWeight.Medium),
-    // Add other font variants as needed
-)
 
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

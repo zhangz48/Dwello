@@ -11,11 +11,36 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Dwello"
-        tools:targetApi="31">
+        android:enableOnBackInvokedCallback="true">
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/Theme.Dwello">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
+            android:theme="@style/Theme.Dwello" />
+        <activity
+            android:name=".AuthActivity"
+            android:exported="false"
+            android:label="@string/title_activity_auth"
+            android:theme="@style/Theme.Dwello" />
+        <activity
+            android:name=".HomeScreen"
+            android:exported="false"
+            android:label="@string/title_activity_home_screen"
+            android:theme="@style/Theme.Dwello" />
+        <activity
+            android:name=".NavigationGraph"
+            android:exported="false"
+            android:label="@string/title_activity_navigation_graph"
             android:theme="@style/Theme.Dwello" />
     </application>
 
