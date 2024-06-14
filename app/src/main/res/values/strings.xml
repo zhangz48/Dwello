@@ -5,4 +5,6 @@
     <string name="title_activity_auth">Auth Activity</string>
     <string name="title_activity_navigation_graph">NavigationGraph</string>
     <string name="title_activity_home_screen">HomeScreen</string>
+    <string name="title_activity_favourites">FavouritesActivity</string>
+    <string name="title_activity_account">AccountActivity</string>
 </resources>

@@ -29,7 +29,11 @@ sealed class Screen(
     object Account : Screen("account", "My Account", Icons.Default.Person)
 }
 
-val bottomNavigationScreens = listOf(Screen.Home, Screen.Favourites, Screen.Account)
+val bottomNavigationScreens = listOf(
+    Screen.Home,
+    Screen.Favourites,
+    Screen.Account
+)
 
 @Composable
 fun NavigationBar(
@@ -73,14 +77,22 @@ fun NavigationBar(
 @Composable
 fun NavigationHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoggedIn: Boolean
 ) {
-    NavHost(navController, startDestination = Screen.Home.route, modifier = modifier) {
+    NavHost(
+        navController,
+        startDestination = Screen.Home.route,
+        modifier = modifier
+    ) {
         composable(Screen.Home.route) { HomeScreen() }
-        composable(Screen.Favourites.route) { FavouritesScreen() }
-        composable(Screen.Account.route) { AccountScreen() }
+        composable(Screen.Favourites.route) {
+            if (isLoggedIn) FavouritesScreen() else AuthScreen() }
+        composable(Screen.Account.route) {
+            if (isLoggedIn) AccountScreen() else AuthScreen() }
+        }
     }
-}
+
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {

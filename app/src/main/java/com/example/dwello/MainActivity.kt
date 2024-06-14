@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,13 +47,13 @@ fun MainScreen() {
     val currentDestination = currentBackStack?.destination
     val currentScreen =
         bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
+    val isLoggedIn = remember { mutableStateOf(false) } // Replace with actual authentication state
 
     Scaffold(
         bottomBar = {
             NavigationBar(
                 allScreens = bottomNavigationScreens,
-                onTabSelected = { newScreen ->
-                    navController.navigateSingleTopTo(newScreen.route)
+                onTabSelected = { newScreen -> navController.navigateSingleTopTo(newScreen.route)
                 },
                 currentScreen = currentScreen
             )
@@ -59,20 +61,10 @@ fun MainScreen() {
     ) { innerPadding ->
         NavigationHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding))
+            modifier = Modifier.padding(innerPadding),
+            isLoggedIn = isLoggedIn.value,
+        )
     }
-}
-
-@Composable
-fun FavouritesScreen() {
-    // Favourites screen content
-    Text("Favourites Screen")
-}
-
-@Composable
-fun AccountScreen() {
-    // Account screen content
-    Text("Account Screen")
 }
 
 @Preview(showBackground = true)
