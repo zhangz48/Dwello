@@ -1,7 +1,6 @@
-package com.example.dwello
+package com.example.dwello.activities
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -11,16 +10,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.dwello.ui.theme.DwelloTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.example.dwello.R
 
 val customFontFamily = FontFamily(
     Font(R.font.cormorant_garamond_regular),
@@ -62,7 +60,7 @@ fun MainScreen() {
         NavigationHost(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            isLoggedIn = isLoggedIn.value,
+            isLoggedIn = isLoggedIn,
         )
     }
 }

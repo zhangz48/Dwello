@@ -1,7 +1,9 @@
-package com.example.dwello
+package com.example.dwello.activities
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -23,27 +25,41 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.dwello.ui.theme.DwelloTheme
 
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("AuthActivity", "onCreate called")
         setContent {
             DwelloTheme {
-                AuthScreen()
+                val isLoggedIn = remember { mutableStateOf(false) }
+                AuthScreen (isLoggedIn = isLoggedIn, onSignUpClick = { navigateToSignUp() })
             }
+        }
+    }
+
+    private fun navigateToSignUp() {
+        Log.d("AuthActivity", "Navigating to SignUpActivity")
+        try {
+            startActivity(Intent(this, SignUpActivity::class.java))
+            Log.d("AuthActivity", "Intent to SignUpActivity started")
+        } catch (e: Exception) {
+            Log.e("AuthActivity", "Failed to navigate to SignUpActivity", e)
         }
     }
 }
 
 @Composable
-fun AuthScreen() {
+fun AuthScreen(isLoggedIn: MutableState<Boolean>, onSignUpClick: () -> Unit) {
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
     val isEntered = email.text.isNotBlank() && password.text.isNotBlank()
+
+    Log.d("AuthScreen", "AuthScreen Composable rendered")
 
     Column(
         modifier = Modifier
@@ -85,7 +101,10 @@ fun AuthScreen() {
             contentAlignment = Alignment.CenterEnd
         ) {
             TextButton(
-                onClick = { /* Add password recovery logic here */ }
+                onClick = {
+                    /* Add password recovery logic here */
+                    Log.d("AuthScreen", "Forgot password clicked")
+                }
             ) {
                 Text(
                     text = "Forgot password?",
@@ -97,7 +116,11 @@ fun AuthScreen() {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /* Add authentication logic here */ },
+            onClick = {
+                /* Add authentication logic here */
+                isLoggedIn.value = true
+                Log.d("AuthScreen", "Log In clicked")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
@@ -125,7 +148,11 @@ fun AuthScreen() {
             )
             ClickableText(
                 text = AnnotatedString("Sign Up"),
-                onClick = { /* Add navigation to sign up screen logic here */ },
+                onClick = {
+                    // navController.navigate("signUp")
+                    onSignUpClick()
+                    Log.d("AuthScreen", "Sign Up clicked") // Add debug log
+                },
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color(0xFF3592FF),
                     textDecoration = TextDecoration.Underline
@@ -168,10 +195,10 @@ fun CustomTextField(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AuthScreenPreview() {
-    DwelloTheme {
-        AuthScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AuthScreenPreview() {
+//    DwelloTheme {
+//        AuthScreen{}
+//    }
+//}

@@ -1,4 +1,4 @@
-package com.example.dwello
+package com.example.dwello.activities
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -13,11 +13,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.example.dwello.viewmodel.UserViewModel
 
 sealed class Screen(
     val route: String,
@@ -67,7 +70,7 @@ fun NavigationBar(
                     selectedTextColor = Color(0xFFC91818),
                     unselectedIconColor = Color.Gray,
                     unselectedTextColor = Color.Gray,
-                    indicatorColor = Color.White,
+                    indicatorColor = Color.White
                 )
             )
         }
@@ -78,7 +81,7 @@ fun NavigationBar(
 fun NavigationHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    isLoggedIn: Boolean
+    isLoggedIn: MutableState<Boolean>,
 ) {
     NavHost(
         navController,
@@ -87,11 +90,26 @@ fun NavigationHost(
     ) {
         composable(Screen.Home.route) { HomeScreen() }
         composable(Screen.Favourites.route) {
-            if (isLoggedIn) FavouritesScreen() else AuthScreen() }
-        composable(Screen.Account.route) {
-            if (isLoggedIn) AccountScreen() else AuthScreen() }
+            if (isLoggedIn.value) FavouritesScreen()
+            else AuthScreen(isLoggedIn = isLoggedIn, onSignUpClick = {})
+//            else navController.navigate("auth")
         }
+        composable(Screen.Account.route) {
+            if (isLoggedIn.value) AccountScreen()
+            else AuthScreen(isLoggedIn = isLoggedIn, onSignUpClick = {})
+//            else navController.navigate("auth")
+        }
+//        composable("auth") { AuthScreen(navController, isLoggedIn) }
+//        composable("signUp") {
+//            val userViewModel: UserViewModel = viewModel()
+//            SignUpScreen(
+//                viewModel = userViewModel,
+//                onBackClick = { navController.popBackStack() },
+//                navController = navController
+//            )
+//        }
     }
+}
 
 
 fun NavHostController.navigateSingleTopTo(route: String) =

@@ -1,7 +1,20 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt") // Apply Kotlin Kapt plugin
 }
+
+val activityVersion by extra("1.9.0")
+val appCompatVersion by extra("1.7.0")
+val constraintLayoutVersion by extra("2.1.4")
+val coreTestingVersion by extra("2.2.0")
+val coroutinesVersion by extra("1.7.3")
+val lifecycleVersion by extra("2.8.2")
+val materialVersion by extra("1.6.8")
+val roomVersion by extra("2.6.1")
+val junitVersion by extra("4.13.2")
+val espressoVersion by extra("3.4.0")
+val androidxJunitVersion by extra("1.1.5")
 
 android {
     namespace = "com.example.dwello"
@@ -64,6 +77,34 @@ dependencies {
 
     // Add Jetpack Navigation Compose dependency
     implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Room dependencies
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    androidTestImplementation("androidx.room:room-testing:$roomVersion")
+
+    // Lifecycle components
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-common-java8:$rootProject.lifecycleVersion")
+
+    // Kotlin coroutines
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutines")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutines")
+
+    // UI
+    implementation("androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion")
+    implementation("com.google.android.material:material:$rootProject.materialVersion")
+
+    // Testing
+    testImplementation("junit:junit:$junitVersion")
+    androidTestImplementation("androidx.arch.core:core-testing:$coreTestingVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVersion") {
+        exclude(group = "com.android.support", module = "support-annotations")
+    }
+    androidTestImplementation("androidx.test.ext:junit:$androidxJunitVersion")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,4 +1,4 @@
-package com.example.dwello
+package com.example.dwello.activities
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
