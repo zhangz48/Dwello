@@ -13,14 +13,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import com.example.dwello.viewmodel.UserViewModel
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.navigation
 
 sealed class Screen(
     val route: String,
@@ -81,36 +80,43 @@ fun NavigationBar(
 fun NavigationHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    isLoggedIn: MutableState<Boolean>,
+    isLoggedIn: Boolean,
 ) {
     NavHost(
-        navController,
+        navController = navController,
         startDestination = Screen.Home.route,
         modifier = modifier
     ) {
         composable(Screen.Home.route) { HomeScreen() }
-        composable(Screen.Favourites.route) {
-            if (isLoggedIn.value) FavouritesScreen()
-            else AuthScreen(isLoggedIn = isLoggedIn, onSignUpClick = {})
-//            else navController.navigate("auth")
-        }
-        composable(Screen.Account.route) {
-            if (isLoggedIn.value) AccountScreen()
-            else AuthScreen(isLoggedIn = isLoggedIn, onSignUpClick = {})
-//            else navController.navigate("auth")
-        }
-//        composable("auth") { AuthScreen(navController, isLoggedIn) }
-//        composable("signUp") {
-//            val userViewModel: UserViewModel = viewModel()
-//            SignUpScreen(
-//                viewModel = userViewModel,
-//                onBackClick = { navController.popBackStack() },
-//                navController = navController
-//            )
-//        }
+        composable(Screen.Favourites.route) { FavouritesScreen() }
+        composable(Screen.Account.route) { AccountScreen() }
+        authNavGraph(navController)
     }
 }
 
+sealed class AuthScreen(val route: String) {
+    object Auth : AuthScreen("auth")
+    object SignUp : AuthScreen("signup")
+}
+
+fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
+    navigation(
+        startDestination = AuthScreen.Auth.route,
+        route = "auth_graph"
+    ) {
+        composable(AuthScreen.Auth.route) {
+            AuthScreen(
+                onSignUpClick = { navController.navigate(AuthScreen.SignUp.route) }
+            )
+        }
+        composable(AuthScreen.SignUp.route) {
+            SignUpScreen(
+                onBackClick = { navController.popBackStack() },
+                onSignUpSuccess = { navController.navigate(AuthScreen.Auth.route) }
+            )
+        }
+    }
+}
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {

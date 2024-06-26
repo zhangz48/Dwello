@@ -30,31 +30,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.dwello.ui.theme.DwelloTheme
 
-class AuthActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d("AuthActivity", "onCreate called")
-        setContent {
-            DwelloTheme {
-                val isLoggedIn = remember { mutableStateOf(false) }
-                AuthScreen (isLoggedIn = isLoggedIn, onSignUpClick = { navigateToSignUp() })
-            }
-        }
-    }
-
-    private fun navigateToSignUp() {
-        Log.d("AuthActivity", "Navigating to SignUpActivity")
-        try {
-            startActivity(Intent(this, SignUpActivity::class.java))
-            Log.d("AuthActivity", "Intent to SignUpActivity started")
-        } catch (e: Exception) {
-            Log.e("AuthActivity", "Failed to navigate to SignUpActivity", e)
-        }
-    }
-}
+//class AuthActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        Log.d("AuthActivity", "onCreate called")
+//        setContent {
+//            DwelloTheme {
+//                val isLoggedIn = remember { mutableStateOf(false) }
+//                AuthScreen (navController, isLoggedIn = isLoggedIn)
+//            }
+//        }
+//    }
+//}
 
 @Composable
-fun AuthScreen(isLoggedIn: MutableState<Boolean>, onSignUpClick: () -> Unit) {
+fun AuthScreen(
+    onSignUpClick: () -> Unit,
+) {
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
     val isEntered = email.text.isNotBlank() && password.text.isNotBlank()
@@ -118,7 +110,6 @@ fun AuthScreen(isLoggedIn: MutableState<Boolean>, onSignUpClick: () -> Unit) {
         Button(
             onClick = {
                 /* Add authentication logic here */
-                isLoggedIn.value = true
                 Log.d("AuthScreen", "Log In clicked")
             },
             modifier = Modifier

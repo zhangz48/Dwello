@@ -26,27 +26,26 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.dwello.data.User
 
-class SignUpActivity : ComponentActivity() {
-    private val userViewModel: UserViewModel by viewModels {
-        UserViewModelFactory((application as DwelloApplication).repository)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            DwelloTheme {
-                SignUpScreen( viewModel = userViewModel, onBackClick = { finish() })
-            }
-        }
-    }
-}
+//class SignUpActivity : ComponentActivity() {
+//    private val userViewModel: UserViewModel by viewModels {
+//        UserViewModelFactory((application as DwelloApplication).repository)
+//    }
+//
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//        setContent {
+//            DwelloTheme {
+//                SignUpScreen( viewModel = userViewModel, onBackClick = { finish() })
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun SignUpScreen(
-    viewModel: UserViewModel,
     onBackClick: () -> Unit,
-//    navController: NavHostController
+    onSignUpSuccess: () -> Unit
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -134,12 +133,8 @@ fun SignUpScreen(
         Button(
             onClick = {
                 if (isButtonEnabled) {
-                    viewModel.insert(
-                        User(firstName = firstName,
-                            lastName = lastName,
-                            email = email,
-                            password = password))
-//                    navController.popBackStack()
+                    // Handle user info insert
+                    onSignUpSuccess()
                 } else {
                     // Handle password mismatch
                 }

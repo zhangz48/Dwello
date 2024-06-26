@@ -6,11 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -45,13 +46,20 @@ fun MainScreen() {
     val currentDestination = currentBackStack?.destination
     val currentScreen =
         bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
-    val isLoggedIn = remember { mutableStateOf(false) } // Replace with actual authentication state
+    val isLoggedIn = checkIfLoggedIn()
 
     Scaffold(
         bottomBar = {
             NavigationBar(
                 allScreens = bottomNavigationScreens,
-                onTabSelected = { newScreen -> navController.navigateSingleTopTo(newScreen.route)
+//                onTabSelected = { newScreen -> navController.navigateSingleTopTo(newScreen.route)
+//                },
+                onTabSelected = { newScreen ->
+                    if (isLoggedIn || newScreen == Screen.Home) {
+                        navController.navigateSingleTopTo(newScreen.route)
+                    } else {
+                        navController.navigateSingleTopTo(AuthScreen.Auth.route)
+                    }
                 },
                 currentScreen = currentScreen
             )
@@ -63,6 +71,12 @@ fun MainScreen() {
             isLoggedIn = isLoggedIn,
         )
     }
+}
+
+private fun checkIfLoggedIn(): Boolean {
+    // Implement your logic to check if the user is logged in
+    // This could be checking a token in shared preferences or a cached user object
+    return false // Replace with actual logic
 }
 
 @Preview(showBackground = true)
