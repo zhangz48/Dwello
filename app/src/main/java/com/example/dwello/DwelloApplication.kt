@@ -13,4 +13,6 @@ class DwelloApplication : Application() {
     // rather than when the application starts
     val database by lazy { UserDatabase.getDatabase(this, applicationScope) }
     val repository by lazy { UserRepository(database.userDao()) }
+
+
 }

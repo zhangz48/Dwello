@@ -1,4 +1,7 @@
 plugins {
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
+
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt") // Apply Kotlin Kapt plugin
@@ -105,6 +108,19 @@ dependencies {
         exclude(group = "com.android.support", module = "support-annotations")
     }
     androidTestImplementation("androidx.test.ext:junit:$androidxJunitVersion")
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+
+    // Other
+    implementation("androidx.compose.material:material-icons-extended:$materialVersion")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

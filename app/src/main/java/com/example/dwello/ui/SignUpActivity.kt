@@ -1,13 +1,5 @@
-package com.example.dwello.activities
+package com.example.dwello.ui
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import com.example.dwello.DwelloApplication
-import com.example.dwello.ui.theme.DwelloTheme
-import com.example.dwello.viewmodel.UserViewModel
-import com.example.dwello.viewmodel.UserViewModelFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,11 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.example.dwello.data.User
+import com.example.dwello.ui.theme.Red100
 
 //class SignUpActivity : ComponentActivity() {
 //    private val userViewModel: UserViewModel by viewModels {
@@ -52,7 +42,6 @@ fun SignUpScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var errorText by remember { mutableStateOf("") }  // To display error messages.
 
     val isEntered = firstName.isNotBlank() &&
             lastName.isNotBlank() &&
@@ -78,13 +67,13 @@ fun SignUpScreen(
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = null,
-                    tint = Color.Red)
+                    tint = Red100)
             }
         }
         Text(
             "Find Your Perfect Home with a Swipe.",
             fontSize = 24.sp,
-            color = Color.Red,
+            color = Red100,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )

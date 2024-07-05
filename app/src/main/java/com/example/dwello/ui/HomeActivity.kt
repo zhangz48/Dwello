@@ -1,4 +1,4 @@
-package com.example.dwello.activities
+package com.example.dwello.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,9 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import com.example.dwello.ui.theme.DwelloTheme
 
 @Composable
@@ -65,10 +63,7 @@ fun HomeScreen() {
                 .background(Color(0xFFA1E6A1)) // Light green background to simulate map
         ) {
             // Placeholder for map markers
-            Text(text = "31", modifier = Modifier.align(Alignment.TopStart).padding(16.dp), fontSize = 24.sp, color = Color.Blue, textAlign = TextAlign.Center)
-            Text(text = "117", modifier = Modifier.align(Alignment.TopEnd).padding(16.dp), fontSize = 24.sp, color = Color.Blue, textAlign = TextAlign.Center)
-            Text(text = "24", modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), fontSize = 24.sp, color = Color.Blue, textAlign = TextAlign.Center)
-            Text(text = "65", modifier = Modifier.align(Alignment.CenterEnd).padding(16.dp), fontSize = 24.sp, color = Color.Blue, textAlign = TextAlign.Center)
+
         }
     }
 }
