@@ -1,4 +1,6 @@
 [versions]
+accompanistPermissions = "0.24.10-beta"
+accompanistPermissionsVersion = "<latest_version>"
 agp = "8.5.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -16,6 +18,8 @@ playServicesMaps = "19.0.0"
 constraintlayout = "2.1.4"
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+accompanist-permissions-vlatestversion = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissionsVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

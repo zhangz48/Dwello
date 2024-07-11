@@ -127,6 +127,7 @@ dependencies {
 
     // Maps SDK for Android
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:19.0.1")
 
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
@@ -137,6 +138,8 @@ dependencies {
 
     // Other
     implementation("androidx.compose.material:material-icons-extended:$materialVersion")
+    implementation(libs.accompanist.permissions)
+    implementation(libs.accompanist.permissions.vlatestversion)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
