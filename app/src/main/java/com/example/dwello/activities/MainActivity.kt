@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,8 +24,13 @@ import com.example.dwello.ui.theme.DwelloTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dwello.R
+import com.example.dwello.fragments.MapsFragment
 import com.example.dwello.viewmodel.AuthViewModel
+import com.example.dwello.viewmodel.MapsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
@@ -37,30 +43,32 @@ val customFontFamily = FontFamily(
     // Add other font variants as needed
 )
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private val TAG = "MainActivity"
     private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
+
         setContent {
             DwelloTheme {
-                MainScreen(authViewModel = authViewModel)
+                MainScreen(
+                    authViewModel = authViewModel,
+                    fragmentManager = supportFragmentManager
+                )
             }
         }
     }
 }
 
 @Composable
-fun MainScreen(authViewModel: AuthViewModel) {
+fun MainScreen(authViewModel: AuthViewModel, fragmentManager: FragmentManager) {
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
-    val currentScreen =
-        bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
+    val currentScreen = bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
     val isLoggedIn by authViewModel.user.collectAsState()
     var selectedTab by remember { mutableStateOf<Screen>(Screen.Home) }
     var redirectScreen by rememberSaveable { mutableStateOf<Screen?>(null)}
@@ -96,17 +104,8 @@ fun MainScreen(authViewModel: AuthViewModel) {
             modifier = Modifier.padding(innerPadding),
             isLoggedIn = isLoggedIn != null,
             authViewModel = authViewModel,
-            redirectScreen = redirectScreen
+            redirectScreen = redirectScreen,
+            fragmentManager = fragmentManager
         )
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun MainScreenPreview() {
-//    val mockAuthViewModel = MockAuthViewModel()
-//    DwelloTheme {
-//        MainScreen(authViewModel = mockAuthViewModel)
-//    }
-//}

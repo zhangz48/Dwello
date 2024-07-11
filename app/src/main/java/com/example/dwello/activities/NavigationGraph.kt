@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -31,6 +33,7 @@ import com.example.dwello.ui.SignUpScreen
 import com.example.dwello.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.dwello.utils.logBackStack
+import com.example.dwello.viewmodel.MapsViewModel
 
 sealed class Screen(
     val route: String,
@@ -98,7 +101,8 @@ fun NavigationHost(
     modifier: Modifier = Modifier,
     isLoggedIn: Boolean,
     authViewModel: AuthViewModel,
-    redirectScreen: Screen?
+    redirectScreen: Screen?,
+    fragmentManager: FragmentManager
 ) {
     NavHost(
         navController = navController,
@@ -106,7 +110,7 @@ fun NavigationHost(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(fragmentManager)
         }
         composable(Screen.Favourites.route) {
             FavouritesScreen()
@@ -138,7 +142,8 @@ fun NavGraphBuilder.authNavGraph(
         composable(AuthScreen.SignUp.route) {
             SignUpScreen(
                 onBackClick = { navController.popBackStack() },
-                onSignUpSuccess = { navController.navigate(AuthScreen.Auth.route) }
+                onSignUpSuccess = { navController.navigate(AuthScreen.Auth.route) },
+                authViewModel = authViewModel
             )
         }
     }

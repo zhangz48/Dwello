@@ -39,63 +39,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 
-//class AuthActivity : ComponentActivity() {
-//
-//    val TAG: String = "EmailPassword"
-//
-//    // [START declare_auth]
-//    private var mAuth: FirebaseAuth? = null
-//
-//
-//    // [END declare_auth]
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        // [START initialize_auth]
-//        // Initialize Firebase Auth
-//        mAuth = FirebaseAuth.getInstance()
-//        // [END initialize_auth]
-//    }
-//
-//    // [START on_start_check_user]
-//    override fun onStart() {
-//        super.onStart()
-//        // Check if user is signed in (non-null) and update UI accordingly.
-//        val currentUser = mAuth!!.currentUser
-//        if (currentUser != null) {
-//            reload()
-//        }
-//    } // [END on_start_check_user]
-//
-//    private fun signIn(email: String, password: String) {
-//        // [START sign_in_with_email]
-//        mAuth!!.signInWithEmailAndPassword(email, password)
-//            .addOnCompleteListener(
-//                this
-//            ) { task ->
-//                if (task.isSuccessful) {
-//                    // Sign in success, update UI with the signed-in user's information
-//                    Log.d(TAG, "signInWithEmail:success")
-//                    val user = mAuth!!.currentUser
-//                    updateUI(user!!)
-//                } else {
-//                    // If sign in fails, display a message to the user.
-//                    Log.w(TAG, "signInWithEmail:failure", task.exception)
-//                    Toast.makeText(
-//                        this@AuthActivity, "Authentication failed.",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                    updateUI(null)
-//                }
-//            }
-//        // [END sign_in_with_email]
-//    }
-//
-//    private fun reload() {}
-//
-//    private fun updateUI(user: FirebaseUser?) {
-//    }
-//}
-
 @Composable
 fun AuthScreen(
     onSignUpClick: () -> Unit,
@@ -127,11 +70,13 @@ fun AuthScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
             text = "Dwello", style = TextStyle(
                 fontFamily = customFontFamily, fontSize = 48.sp, fontWeight = FontWeight.Medium
             ), modifier = Modifier.padding(bottom = 50.dp), textAlign = TextAlign.Center
         )
+
         CustomTextField(
             value = email,
             onValueChange = {
@@ -147,8 +92,9 @@ fun AuthScreen(
             isError = emailError != null,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 14.dp)
+                .padding(bottom = 0.dp)
         )
+
         if (emailError != null) {
             Text(
                 text = emailError ?: "",
@@ -156,9 +102,12 @@ fun AuthScreen(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 0.dp)
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         CustomTextField(
             value = password,
             onValueChange = { password = it },
@@ -171,6 +120,7 @@ fun AuthScreen(
                 .fillMaxWidth()
                 .padding(bottom = 0.dp)
         )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -190,6 +140,7 @@ fun AuthScreen(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
                 /* Add authentication logic here */
@@ -214,6 +165,7 @@ fun AuthScreen(
             )
         }
         Spacer(modifier = Modifier.height(130.dp))
+
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically

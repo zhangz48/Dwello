@@ -7,14 +7,18 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AuthViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     private val _user = MutableStateFlow<FirebaseUser?>(auth.currentUser)
     val user: StateFlow<FirebaseUser?> = _user
@@ -41,6 +45,31 @@ class AuthViewModel : ViewModel() {
                         _signInState.value = SignInState.Failure(errorMessage)
                     }
                 }
+        }
+    }
+
+    fun signUp(email: String, password: String, firstName: String, lastName: String, onSignUpSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                val result = auth.createUserWithEmailAndPassword(email, password).await()
+                val user = result.user
+                if (user != null) {
+                    val userProfile = hashMapOf(
+                        "firstName" to firstName,
+                        "lastName" to lastName,
+                        "email" to email
+                    )
+                    firestore.collection("users").document(user.uid).set(userProfile)
+                    onSignUpSuccess()
+                }
+            } catch (e: Exception) {
+                val errorMessage = when (e) {
+                    is FirebaseAuthWeakPasswordException -> "Weak password. Please use a stronger password."
+                    is FirebaseAuthUserCollisionException -> "This email is already in use."
+                    else -> "Sign up failed. Please try again."
+                }
+                _signInState.value = SignInState.Failure(errorMessage)
+            }
         }
     }
 

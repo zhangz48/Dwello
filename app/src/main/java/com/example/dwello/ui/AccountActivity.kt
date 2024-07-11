@@ -30,14 +30,8 @@ fun AccountScreen(authViewModel: AuthViewModel, navController: NavHostController
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = "My account",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            ),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        TopBarAccount()
+        Spacer(modifier = Modifier.height(16.dp))
 
         AccountItem("Personal Information")
         Divider()
@@ -48,6 +42,26 @@ fun AccountScreen(authViewModel: AuthViewModel, navController: NavHostController
 
         Spacer(modifier = Modifier.weight(1f))
         SignOutButton(authViewModel, navController)
+    }
+    Log.d("AccountScreen", "Account screen called")
+}
+
+@Composable
+fun TopBarAccount() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 0.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "My account",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp
+            )
+        )
     }
 }
 
