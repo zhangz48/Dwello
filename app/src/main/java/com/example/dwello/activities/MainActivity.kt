@@ -24,13 +24,14 @@ import com.example.dwello.ui.theme.DwelloTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dwello.R
-import com.example.dwello.fragments.MapsFragment
 import com.example.dwello.viewmodel.AuthViewModel
 import com.example.dwello.viewmodel.MapsViewModel
+import com.example.dwello.viewmodel.MapsViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
@@ -47,6 +48,9 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var auth: FirebaseAuth
     private val authViewModel: AuthViewModel by viewModels()
+    private val mapsViewModel: MapsViewModel by viewModels {
+        MapsViewModelFactory(applicationContext)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +60,7 @@ class MainActivity : FragmentActivity() {
             DwelloTheme {
                 MainScreen(
                     authViewModel = authViewModel,
-                    fragmentManager = supportFragmentManager
+                    mapsViewModel = mapsViewModel
                 )
             }
         }
@@ -64,7 +68,7 @@ class MainActivity : FragmentActivity() {
 }
 
 @Composable
-fun MainScreen(authViewModel: AuthViewModel, fragmentManager: FragmentManager) {
+fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
@@ -95,7 +99,7 @@ fun MainScreen(authViewModel: AuthViewModel, fragmentManager: FragmentManager) {
                         navController.navigateSingleTopTo(AuthScreen.Auth.route)
                     }
                 },
-                currentScreen = selectedTab
+                currentScreen = selectedTab,
             )
         }
     ) { innerPadding ->
@@ -105,7 +109,7 @@ fun MainScreen(authViewModel: AuthViewModel, fragmentManager: FragmentManager) {
             isLoggedIn = isLoggedIn != null,
             authViewModel = authViewModel,
             redirectScreen = redirectScreen,
-            fragmentManager = fragmentManager
+            mapsViewModel = mapsViewModel
         )
     }
 }

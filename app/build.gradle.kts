@@ -21,6 +21,7 @@ val junitVersion by extra("4.13.2")
 val espressoVersion by extra("3.4.0")
 val androidxJunitVersion by extra("1.1.5")
 val fragment_version by extra("1.8.1")
+val mapsComposeVersion = "6.1.0"
 
 android {
     namespace = "com.example.dwello"
@@ -105,6 +106,7 @@ dependencies {
     // UI
     implementation("androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion")
     implementation("com.google.android.material:material:$rootProject.materialVersion")
+    implementation("androidx.compose.material:material-icons-extended:$rootProject.materialVersion")
 
     // Testing
     testImplementation("junit:junit:$junitVersion")
@@ -127,7 +129,13 @@ dependencies {
 
     // Maps SDK for Android
     implementation("com.google.android.gms:play-services-maps:19.0.0")
-    implementation("com.google.android.gms:play-services-location:19.0.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    // Google Maps Compose library
+    implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
+    // Google Maps Compose utility library
+    implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
+    // Google Maps Compose widgets library
+    implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
 
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")

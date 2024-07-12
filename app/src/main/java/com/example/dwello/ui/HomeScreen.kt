@@ -2,8 +2,6 @@ package com.example.dwello.ui
 
 import android.util.Log
 import android.widget.FrameLayout
-import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -14,34 +12,32 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.currentplacedetailsonmap.MapScreen
 import com.example.dwello.R
-import com.example.dwello.fragments.MapsFragment
-import com.example.dwello.ui.theme.DwelloTheme
 import com.example.dwello.viewmodel.MapsViewModel
-import com.google.android.gms.maps.MapFragment
-import com.google.android.gms.maps.SupportMapFragment
 
 @Composable
-fun HomeScreen(fragmentManager: FragmentManager) {
-    Column(modifier = Modifier.fillMaxSize()) {
+fun HomeScreen(mapsViewModel: MapsViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         // Search and Filter section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp, 4.dp, 16.dp, 4.dp)
+                .padding(16.dp, 16.dp, 16.dp, 4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -139,27 +135,17 @@ fun HomeScreen(fragmentManager: FragmentManager) {
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-        // Map section using Fragment
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                FrameLayout(ctx).apply {
-                    id = R.id.map_container
-                    fragmentManager.beginTransaction()
-                        .replace(this.id, MapsFragment())
-                        .commit()
-                }
-            }
+
+        // Border line before the MapScreen
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(Color.Gray)
         )
+
+        // Map section using Compose
+        MapScreen(viewModel = mapsViewModel)
         Log.d("HomeScreen", "Home screen called")
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    DwelloTheme {
-//        HomeScreen()
-//    }
-//}

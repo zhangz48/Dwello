@@ -1,10 +1,8 @@
 package com.example.dwello.ui
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -35,8 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.example.dwello.activities.customFontFamily
 import com.example.dwello.viewmodel.AuthViewModel
 import com.example.dwello.viewmodel.SignInState
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 
 
 @Composable

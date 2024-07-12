@@ -1,7 +1,15 @@
 package com.example.dwello.activities
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,14 +18,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,9 +55,9 @@ sealed class Screen(
     val title: String,
     val icon: ImageVector
 ) {
-    object Home : Screen("home", "Find Homes", Icons.Default.Home)
-    object Favourites : Screen("favourites", "Favourites", Icons.Default.Favorite)
-    object Account : Screen("account", "My Account", Icons.Default.Person)
+    object Home : Screen("home", "Find Homes", Icons.Outlined.Home)
+    object Favourites : Screen("favourites", "Favourites", Icons.Outlined.FavoriteBorder)
+    object Account : Screen("account", "My Account", Icons.Outlined.Person)
 }
 
 sealed class AuthScreen(val route: String) {
@@ -60,37 +75,60 @@ val bottomNavigationScreens = listOf(
 fun NavigationBar(
     allScreens: List<Screen>,
     onTabSelected: (Screen) -> Unit,
-    currentScreen: Screen
+    currentScreen: Screen,
+    borderThickness: Dp = 0.5.dp
 ) {
-    androidx.compose.material3.NavigationBar(
-        containerColor = Color.White,
-        contentColor = Color.Gray
-    ) {
-        allScreens.forEach { screen ->
-            val isSelected = currentScreen == screen
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        screen.icon,
-                        contentDescription = screen.title,
+    Box {
+        // Top border line
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(borderThickness)
+                .background(Color.Gray)
+                .align(Alignment.TopCenter)
+        )
+        // NavigationBar content
+        androidx.compose.material3.NavigationBar(
+            modifier = Modifier
+                .height(56.dp)
+                .padding(top = borderThickness), // Adjust the height of the NavigationBar
+            containerColor = Color.White,
+            contentColor = Color.Gray
+        ) {
+            allScreens.forEach { screen ->
+                val isSelected = currentScreen == screen
+                NavigationBarItem(
+                    selected = isSelected,
+                    onClick = { onTabSelected(screen) },
+                    icon = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(0.dp) // Adjust this value to control the spacing
+                        ) {
+                            Icon(
+                                imageVector = screen.icon,
+                                contentDescription = screen.title,
+                                tint = if (isSelected) Color(0xFFC91818) else Color.Black,
+                                modifier = Modifier.size(28.dp) // Adjust icon size
+                            )
+                            Text(
+                                text = screen.title,
+                                color = if (isSelected) Color(0xFFC91818) else Color.Black,
+                                style = MaterialTheme.typography.labelSmall, // Customize text style
+                                modifier = Modifier.padding(0.dp) // No padding around the label
+                            )
+                        }
+                    },
+                    modifier = Modifier.padding(6.dp), // No padding around the item
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFFC91818),
+                        selectedTextColor = Color(0xFFC91818),
+                        unselectedIconColor = Color.Gray,
+                        unselectedTextColor = Color.Gray,
+                        indicatorColor = Color.Transparent // Set to transparent to remove indicator
                     )
-                },
-                label = {
-                    Text(
-                        text = screen.title,
-                    )
-                },
-                selected = isSelected,
-                onClick = { onTabSelected(screen) },
-                modifier = Modifier.padding(3.dp),
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFFC91818),
-                    selectedTextColor = Color(0xFFC91818),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    indicatorColor = Color.White
                 )
-            )
+            }
         }
     }
 }
@@ -102,7 +140,7 @@ fun NavigationHost(
     isLoggedIn: Boolean,
     authViewModel: AuthViewModel,
     redirectScreen: Screen?,
-    fragmentManager: FragmentManager
+    mapsViewModel: MapsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -110,7 +148,7 @@ fun NavigationHost(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(fragmentManager)
+            HomeScreen(mapsViewModel)
         }
         composable(Screen.Favourites.route) {
             FavouritesScreen()

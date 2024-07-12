@@ -12,4 +12,8 @@ val Pink40 = Color(0xFF7D5260)
 
 val Red100 = Color(0xFFC91818)
 val Red50 = Color(0xFFD26971)
+val BrightBlue = Color(0xFF0059FF)
 val Blue80 = Color(0xFF3592FF)
+val CrystalBlue = Color(0xFF5CB3FF)
+val DaySkyBlue = Color(0xFF82CCFF)
+val LightBlue = Color(0xFFC9E2FF)
