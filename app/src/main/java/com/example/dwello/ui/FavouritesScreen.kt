@@ -25,15 +25,15 @@ import com.example.dwello.ui.theme.DwelloTheme
 
 @Composable
 fun FavouritesScreen() {
+    Log.d("FavouritesScreen", "FavouritesScreen Composable rendered")
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp, 16.dp, 16.dp, 0.dp)
     ) {
         TopBar()
         SavedHomesList()
     }
-    Log.d("FavouritesScreen", "Favourites screen called")
 }
 
 @Composable

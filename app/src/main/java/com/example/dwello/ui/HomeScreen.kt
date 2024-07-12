@@ -29,6 +29,7 @@ import com.example.dwello.viewmodel.MapsViewModel
 
 @Composable
 fun HomeScreen(mapsViewModel: MapsViewModel) {
+    Log.d("HomeScreen", "HomeScreen Composable rendered")
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,6 +147,5 @@ fun HomeScreen(mapsViewModel: MapsViewModel) {
 
         // Map section using Compose
         MapScreen(viewModel = mapsViewModel)
-        Log.d("HomeScreen", "Home screen called")
     }
 }

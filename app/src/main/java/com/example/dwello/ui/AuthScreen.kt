@@ -40,7 +40,7 @@ fun AuthScreen(
     onSignUpClick: () -> Unit,
     onSignInClick: (email: String, password: String) -> Unit,
     authViewModel: AuthViewModel,
-    selectedTab: String? = null
+    //selectedTab: String? = null
 ) {
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
@@ -55,7 +55,10 @@ fun AuthScreen(
     LaunchedEffect(signInState) {
         if (signInState is SignInState.Failure) {
             Toast.makeText(context, (signInState as SignInState.Failure).errorMessage, Toast.LENGTH_SHORT).show()
-            authViewModel.resetSignInState() // Reset the sign-in state
+            authViewModel.resetSignInState()
+        } else if (signInState is SignInState.Success) {
+            // Logging for debugging
+            Log.d("AuthScreen", "Login successful, triggering MainScreen to navigate")
         }
     }
 
@@ -124,7 +127,12 @@ fun AuthScreen(
             contentAlignment = Alignment.CenterEnd
         ) {
             TextButton(onClick = {
-                /* Add password recovery logic here */
+                if (email.text.isNotBlank() && emailError == null) {
+                    authViewModel.sendPasswordReset(email.text)
+                    Toast.makeText(context, "Password reset email sent", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                }
                 Log.d("AuthScreen", "Forgot password clicked")
             }) {
                 Text(
@@ -139,7 +147,6 @@ fun AuthScreen(
 
         Button(
             onClick = {
-                /* Add authentication logic here */
                 Log.d("AuthScreen", "Log In clicked")
                 onSignInClick(email.text, password.text)
             },

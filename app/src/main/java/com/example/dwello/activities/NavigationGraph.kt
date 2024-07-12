@@ -137,9 +137,9 @@ fun NavigationBar(
 fun NavigationHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    isLoggedIn: Boolean,
+    //isLoggedIn: Boolean,
     authViewModel: AuthViewModel,
-    redirectScreen: Screen?,
+    //redirectScreen: Screen?,
     mapsViewModel: MapsViewModel
 ) {
     NavHost(
@@ -193,7 +193,7 @@ fun NavHostController.navigateSingleTopTo(route: String) {
             saveState = true
         }
         launchSingleTop = true
-        restoreState = true
+        restoreState = false
     }
     logBackStack() // Log the back stack after navigation
 }

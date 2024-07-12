@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.navigation.NavController
 
 fun NavController.logBackStack() {
-    Log.d("NavControllerBackStack", "Current Back Stack:")
+    //Log.d("NavControllerBackStack", "Current Back Stack:")
     this.currentBackStackEntry?.let { entry ->
         Log.d("NavControllerBackStack", "Current: ${entry.destination.route ?: "Unknown Route"}")
     }

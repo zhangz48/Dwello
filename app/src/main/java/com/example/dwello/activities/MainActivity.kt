@@ -29,6 +29,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dwello.R
+import com.example.dwello.utils.logBackStack
 import com.example.dwello.viewmodel.AuthViewModel
 import com.example.dwello.viewmodel.MapsViewModel
 import com.example.dwello.viewmodel.MapsViewModelFactory
@@ -44,7 +45,7 @@ val customFontFamily = FontFamily(
     // Add other font variants as needed
 )
 
-class MainActivity : FragmentActivity() {
+class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
     private val authViewModel: AuthViewModel by viewModels()
@@ -70,18 +71,30 @@ class MainActivity : FragmentActivity() {
 @Composable
 fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
     val navController = rememberNavController()
-    val currentBackStack by navController.currentBackStackEntryAsState()
-    val currentDestination = currentBackStack?.destination
-    val currentScreen = bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
+//    val currentBackStack by navController.currentBackStackEntryAsState()
+//    val currentDestination = currentBackStack?.destination
+//    val currentScreen = bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
     val isLoggedIn by authViewModel.user.collectAsState()
     var selectedTab by remember { mutableStateOf<Screen>(Screen.Home) }
     var redirectScreen by rememberSaveable { mutableStateOf<Screen?>(null)}
 
+    Log.d("MainScreen", "MainScreen Composable rendered")
+
     LaunchedEffect(isLoggedIn) {
         redirectScreen?.let { screen ->
             if (isLoggedIn != null) {
+                Log.d("MainScreen", "User logged in, redirecting to: ${screen.route}")
+
+                // Attempt to pop the auth screen from the back stack
+                val popped = navController.popBackStack(AuthScreen.Auth.route, inclusive = true)
+                Log.d("MainScreen", "popBackStack result: $popped")
+
+                // Navigate to the intended screen
                 navController.navigateSingleTopTo(screen.route)
                 redirectScreen = null
+
+                // Log final back stack state
+                navController.logBackStack()
             }
         }
     }
@@ -96,6 +109,7 @@ fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
                         navController.navigateSingleTopTo(newScreen.route)
                     } else {
                         redirectScreen = newScreen
+                        Log.d("MainScreen", "User not logged in, redirecting to AuthScreen")
                         navController.navigateSingleTopTo(AuthScreen.Auth.route)
                     }
                 },
@@ -106,9 +120,9 @@ fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
         NavigationHost(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            isLoggedIn = isLoggedIn != null,
+            //isLoggedIn = isLoggedIn != null,
             authViewModel = authViewModel,
-            redirectScreen = redirectScreen,
+            //redirectScreen = redirectScreen,
             mapsViewModel = mapsViewModel
         )
     }

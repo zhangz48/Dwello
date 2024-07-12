@@ -1,5 +1,6 @@
 package com.example.dwello.ui
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,8 @@ fun SignUpScreen(
     onSignUpSuccess: () -> Unit,
     authViewModel: AuthViewModel
 ) {
+    Log.d("SignUpScreen", "SignUpScreen Composable rendered")
+
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }

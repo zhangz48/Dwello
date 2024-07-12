@@ -20,6 +20,9 @@ import com.example.dwello.utils.logBackStack
 
 @Composable
 fun AccountScreen(authViewModel: AuthViewModel, navController: NavHostController) {
+
+    Log.d("AccountScreen", "AccountScreen Composable rendered")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,12 +116,3 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavHostController
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun AccountScreenPreview() {
-//        val mockAuthViewModel = remember { MockAuthViewModel() }
-//        DwelloTheme {
-//                AccountScreen(authViewModel = mockAuthViewModel)
-//        }
-//}

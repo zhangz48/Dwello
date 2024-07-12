@@ -39,6 +39,8 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapScreen(viewModel: MapsViewModel) {
+    Log.d("MapScreen", "MapScreen Composable rendered")
+
     val context = LocalContext.current
 
     // Define the map type state
