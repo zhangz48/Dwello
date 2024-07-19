@@ -55,12 +55,20 @@ class AuthViewModel : ViewModel() {
                 val user = result.user
                 if (user != null) {
                     val userProfile = hashMapOf(
-                        "firstName" to firstName,
-                        "lastName" to lastName,
-                        "email" to email
+                        "first_name" to firstName,
+                        "last_name" to lastName,
+                        "email" to email,
+                        "saved_listings" to emptyList<String>() // Initialize saved listings as an empty list
                     )
-                    firestore.collection("users").document(user.uid).set(userProfile)
-                    onSignUpSuccess()
+                    try {
+                        firestore.collection("users").document(user.uid).set(userProfile).await()
+                        Log.d("AuthViewModel", "User profile created")
+                        onSignUpSuccess()
+                    } catch (firestoreException: Exception) {
+                        // If Firestore write fails, delete the created FirebaseAuth user
+                        user.delete().await()
+                        throw firestoreException
+                    }
                 }
             } catch (e: Exception) {
                 val errorMessage = when (e) {

@@ -58,7 +58,7 @@ fun MapScreen(viewModel: MapsViewModel) {
 
     // Define the camera position state
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(40.7484, -73.9857), defaultZoomLevel)
+        position = CameraPosition.fromLatLngZoom(LatLng(47.6101, -122.2015), defaultZoomLevel)
     }
 
     // Function to center the map on the user's location
@@ -124,7 +124,8 @@ fun MapScreen(viewModel: MapsViewModel) {
             ),
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
-                zoomControlsEnabled = false
+                zoomControlsEnabled = false,
+                rotationGesturesEnabled = false
             ),
             onMapLoaded = {
                 // Optionally, do something when the map is loaded

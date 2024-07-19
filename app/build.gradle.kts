@@ -22,6 +22,7 @@ val espressoVersion by extra("3.4.0")
 val androidxJunitVersion by extra("1.1.5")
 val fragment_version by extra("1.8.1")
 val mapsComposeVersion = "6.1.0"
+val kotlin_version = "2.0.0"
 
 android {
     namespace = "com.example.dwello"
@@ -117,7 +118,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:$androidxJunitVersion")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
 
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
@@ -125,7 +126,8 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation(libs.firebase.firestore.ktx)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
 
     // Maps SDK for Android
     implementation("com.google.android.gms:play-services-maps:19.0.0")
@@ -136,6 +138,10 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+
+    // If updating kotlin-bom version number above, also edit project-level build.gradle definition of $kotlin_version variable
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:$kotlin_version"))
+    implementation("com.google.android.libraries.places:places:3.5.0")
 
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
