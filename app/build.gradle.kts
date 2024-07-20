@@ -154,6 +154,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:$materialVersion")
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.permissions.vlatestversion)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

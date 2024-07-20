@@ -1,22 +1,13 @@
 package com.example.currentplacedetailsonmap
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,16 +16,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import com.example.dwello.data.Property
 import com.example.dwello.ui.theme.*
-import com.example.dwello.ui.theme.DaySkyBlue
+import com.example.dwello.ui.components.formatPrice
+import com.example.dwello.ui.components.setCustomMapIcon
+import com.example.dwello.utils.bitmapDescriptorFromComposable
 import com.example.dwello.viewmodel.MapsViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
+
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -42,6 +37,18 @@ fun MapScreen(viewModel: MapsViewModel) {
     Log.d("MapScreen", "MapScreen Composable rendered")
 
     val context = LocalContext.current
+
+    // Fetch properties from Firebase when the composable is first launched
+    LaunchedEffect(Unit) {
+        Log.d("MapScreen", "Fetching properties")
+        viewModel.fetchProperties()
+    }
+
+    // Remember the properties as state
+    val properties by remember { mutableStateOf(viewModel.properties) }
+
+    // Track selected marker
+    var selectedProperty by remember { mutableStateOf<Property?>(null) }
 
     // Define the map type state
     var mapType by remember { mutableStateOf(MapType.NORMAL) }
@@ -114,6 +121,9 @@ fun MapScreen(viewModel: MapsViewModel) {
         }
     }
 
+    // Cache bitmaps for custom markers
+    val markerBitmaps = remember { mutableMapOf<Property, BitmapDescriptor>() }
+
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
@@ -125,12 +135,32 @@ fun MapScreen(viewModel: MapsViewModel) {
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
                 zoomControlsEnabled = false,
-                rotationGesturesEnabled = false
+                rotationGesturesEnabled = true
             ),
             onMapLoaded = {
                 // Optionally, do something when the map is loaded
+            },
+            onMapClick = {
+                selectedProperty = null
             }
-        )
+        ) {
+            // Display markers for each property
+            properties.forEach { property ->
+                val isSelected = property == selectedProperty
+                val icon = setCustomMapIcon(formatPrice(property.price), isSelected)
+
+                Marker(
+                    state = MarkerState(position = LatLng(property.lat, property.lng)),
+                    title = null,
+                    snippet = null,
+                    icon = icon,
+                    onClick = {
+                        selectedProperty = property
+                        true
+                    }
+                )
+            }
+        }
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
