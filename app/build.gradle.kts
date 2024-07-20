@@ -111,6 +111,8 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.mockito:mockito-core:3.11.2")
+    testImplementation("com.google.firebase:firebase-firestore:25.0.0")
     androidTestImplementation("androidx.arch.core:core-testing:$coreTestingVersion")
     androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVersion") {
         exclude(group = "com.android.support", module = "support-annotations")

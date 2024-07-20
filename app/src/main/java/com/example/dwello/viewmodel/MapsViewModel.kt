@@ -126,7 +126,9 @@ class MapsViewModel(context: Context) : ViewModel() {
         viewModelScope.launch {
             // Load cached properties first
             val cachedProperties = database.propertyDao().getAllProperties()
+            Log.d("MapsViewModel", "Cached properties: $cachedProperties")
             _properties.value = cachedProperties.map { it.toDomain() }
+            Log.d("MapsViewModel", "Mapped cached properties to domain: ${_properties.value}")
 //            properties.clear()
 //            properties.addAll(cachedProperties.map { it.toDomain() })
 
@@ -134,10 +136,15 @@ class MapsViewModel(context: Context) : ViewModel() {
             firestore.collection("properties").get().addOnSuccessListener { documents ->
                 val fetchedProperties = mutableListOf<PropertyEntity>()
                 for (document in documents) {
+                    // Log the raw Firestore document data
+                    Log.d("MapsViewModel", "Raw Firestore document data: ${document.data}")
+
                     var property = document.toObject(Property::class.java).copy(pid = document.id)
 
+
+
                     // Log each property to verify correct fetching
-                    Log.d("MapsViewModel", "Fetched property: $property")
+                    Log.d("MapsViewModel", "Fetched property from Firestore: $property")
 
                     if (property.lat == 0.0 && property.lng == 0.0) {
                         val address =
@@ -150,15 +157,20 @@ class MapsViewModel(context: Context) : ViewModel() {
                                 )
                                 // Update property in Firestore with the new lat/lng
                                 firestore.collection("properties").document(property.pid).set(property)
+                                Log.d("MapsViewModel", "Updated property with lat/lng: $property")
                             }
                         }
                     }
                     fetchedProperties.add(property.toEntity())
+                    Log.d("MapsViewModel", "Converted property to entity: ${property.toEntity()}")
                 }
                 viewModelScope.launch {
                     database.propertyDao().deleteAll()
+                    Log.d("MapsViewModel", "Cleared local database")
                     database.propertyDao().insertAll(fetchedProperties)
+                    Log.d("MapsViewModel", "Inserted fetched properties into local database: $fetchedProperties")
                     _properties.value = fetchedProperties.map { it.toDomain() }
+                    Log.d("MapsViewModel", "Mapped fetched properties to domain: ${_properties.value}")
 //                    properties.clear()
 //                    properties.addAll(fetchedProperties.map { it.toDomain() })
                 }
@@ -213,6 +225,13 @@ class MapsViewModel(context: Context) : ViewModel() {
                     }
                 }
             }
+    }
+
+    fun clearLocalDatabase() {
+        viewModelScope.launch {
+            database.propertyDao().deleteAll()
+            _properties.value = emptyList()
+        }
     }
 
     override fun onCleared() {

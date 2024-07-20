@@ -52,11 +52,11 @@ import java.util.Locale
 fun PropertyPreview(property: Property, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .width(350.dp)
+            .width(380.dp)
             .padding(vertical = 8.dp)
             .clickable { onClick() }, // Added clickable modifier
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column (
             modifier = Modifier.background(Color.White)

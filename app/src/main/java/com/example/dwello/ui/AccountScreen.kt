@@ -16,10 +16,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.dwello.viewmodel.AuthViewModel
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import com.example.dwello.utils.logBackStack
+import com.example.dwello.viewmodel.MapsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun AccountScreen(authViewModel: AuthViewModel, navController: NavHostController) {
+fun AccountScreen(
+    authViewModel: AuthViewModel,
+    navController: NavHostController,
+    mapsViewModel: MapsViewModel
+) {
 
     Log.d("AccountScreen", "AccountScreen Composable rendered")
 
@@ -32,11 +42,12 @@ fun AccountScreen(authViewModel: AuthViewModel, navController: NavHostController
         Spacer(modifier = Modifier.height(16.dp))
 
         AccountItem("Personal Information")
-        Divider()
+
         AccountItem("Sign In & Security")
-        Divider()
+
         AccountItem("About")
-        Divider()
+
+        ClearCacheButton(mapsViewModel)
 
         Spacer(modifier = Modifier.weight(1f))
         SignOutButton(authViewModel, navController)
@@ -78,10 +89,41 @@ fun AccountItem(title: String) {
             modifier = Modifier.weight(1f)
         )
         Icon(
-            imageVector = Icons.Default.ArrowForward,
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = null,
             tint = Color.Gray
         )
+    }
+}
+
+@Composable
+fun ClearCacheButton(mapsViewModel: MapsViewModel) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    mapsViewModel.clearLocalDatabase()
+                    Toast.makeText(context, "Cache cleared", Toast.LENGTH_SHORT).show()
+                }
+            }
+        ) {
+            Text(
+                text = "Clear Cache",
+                style = TextStyle(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            )
+        }
     }
 }
 

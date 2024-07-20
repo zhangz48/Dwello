@@ -1,24 +1,30 @@
 package com.example.dwello.data
 
+import com.example.dwello.data.Property
+import com.example.dwello.data.PropertyEntity
+import com.google.firebase.Timestamp
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
 fun PropertyEntity.toDomain(): Property {
     return Property(
         pid = this.pid,
-        aboutHome = this.aboutHome,
+        about_home = this.about_home,
         baths = this.baths,
         beds = this.beds,
-        builtYear = this.builtYear,
+        built_year = this.built_year,
         city = this.city,
-        estMonthly = this.estMonthly,
+        est_monthly = this.est_monthly,
         hoa = this.hoa,
-        imageUrls = this.imageUrls,
-        listDate = this.listDate,
-        parkingSpace = this.parkingSpace,
+        image_urls = this.image_urls,
+        list_date = Timestamp(this.list_date, 0),
+        parking_space = this.parking_space,
         price = this.price,
-        propertyType = this.propertyType,
+        property_type = this.property_type,
         state = this.state,
         street = this.street,
         sqft = this.sqft,
-        thumbnailUrl = this.thumbnailUrl,
+        thumbnail_url = this.thumbnail_url,
         zipcode = this.zipcode,
         lat = this.lat,
         lng = this.lng
@@ -28,22 +34,22 @@ fun PropertyEntity.toDomain(): Property {
 fun Property.toEntity(): PropertyEntity {
     return PropertyEntity(
         pid = this.pid,
-        aboutHome = this.aboutHome,
+        about_home = this.about_home,
         baths = this.baths,
         beds = this.beds,
-        builtYear = this.builtYear,
+        built_year = this.built_year,
         city = this.city,
-        estMonthly = this.estMonthly,
+        est_monthly = this.est_monthly,
         hoa = this.hoa,
-        imageUrls = this.imageUrls,
-        listDate = this.listDate,
-        parkingSpace = this.parkingSpace,
+        image_urls = this.image_urls,
+        list_date = this.list_date.seconds,
+        parking_space = this.parking_space,
         price = this.price,
-        propertyType = this.propertyType,
+        property_type = this.property_type,
         state = this.state,
         street = this.street,
         sqft = this.sqft,
-        thumbnailUrl = this.thumbnailUrl,
+        thumbnail_url = this.thumbnail_url,
         zipcode = this.zipcode,
         lat = this.lat,
         lng = this.lng

@@ -222,8 +222,15 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
 
         // Display the selected property preview
         if (selectedProperty != null) {
-            PropertyPreview(property = selectedProperty!!) {
-                navController.navigate("property_listing_page")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 8.dp), // Adjust the padding to move it a bit up from the bottom
+                contentAlignment = Alignment.BottomCenter // Center the PropertyPreview at the bottom
+            ) {
+                PropertyPreview(property = selectedProperty!!) {
+                    navController.navigate("property_listing_page")
+                }
             }
         }
     }

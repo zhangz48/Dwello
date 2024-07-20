@@ -3,27 +3,28 @@ package com.example.dwello.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.google.firebase.Timestamp
 import java.time.LocalDateTime
 
 @Entity(tableName = "properties")
 data class PropertyEntity(
     @PrimaryKey val pid: String,
-    val aboutHome: String,
+    val about_home: String,
     val baths: Double,
     val beds: Int,
-    val builtYear: Int,
+    val built_year: Int,
     val city: String,
-    val estMonthly: Int,
+    val est_monthly: Int,
     val hoa: Int,
-    val imageUrls: List<String>,
-    val listDate: LocalDateTime,
-    val parkingSpace: Int,
+    val image_urls: List<String>,
+    val list_date: Long,
+    val parking_space: Int,
     val price: Long,
-    val propertyType: String,
+    val property_type: String,
     val state: String,
     val street: String,
     val sqft: Int,
-    val thumbnailUrl: String,
+    val thumbnail_url: String,
     val zipcode: String,
     val lat: Double,
     val lng: Double

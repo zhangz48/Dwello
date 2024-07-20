@@ -3,6 +3,8 @@ package com.example.dwello.utils
 import android.content.Context
 import androidx.room.Room
 import com.example.dwello.repositories.AppDatabase
+import com.example.dwello.repositories.MIGRATION_1_2
+
 
 object DatabaseProvider {
     private var INSTANCE: AppDatabase? = null
@@ -13,7 +15,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "property_database"
-            ).build()
+            )
+//                .addMigrations(MIGRATION_1_2) // Add the migration here
+                .build()
             INSTANCE = instance
             instance
         }

@@ -155,7 +155,7 @@ fun NavigationHost(
             FavouritesScreen()
         }
         composable(Screen.Account.route) {
-            AccountScreen(authViewModel, navController)
+            AccountScreen(authViewModel, navController, mapsViewModel)
         }
         composable("property_listing_page") {
             PropertyListingScreen()
