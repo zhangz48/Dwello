@@ -2,6 +2,7 @@ package com.example.dwello.ui
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -88,7 +89,9 @@ fun HomeItem() {
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column {
+        Column (
+            modifier = Modifier.background(Color.White)
+        ) {
             val image: Painter = painterResource(id = R.drawable.placeholder_image) // Use the PNG drawable
             Image(
                 painter = image,

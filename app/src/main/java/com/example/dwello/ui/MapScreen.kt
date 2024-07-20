@@ -16,11 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.dwello.data.Property
+import com.example.dwello.ui.components.PropertyPreview
 import com.example.dwello.ui.theme.*
 import com.example.dwello.ui.components.formatPrice
 import com.example.dwello.ui.components.setCustomMapIcon
-import com.example.dwello.utils.bitmapDescriptorFromComposable
 import com.example.dwello.viewmodel.MapsViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -33,19 +34,19 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapScreen(viewModel: MapsViewModel) {
+fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
     Log.d("MapScreen", "MapScreen Composable rendered")
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    // Fetch properties from Firebase when the composable is first launched
+    // Fetch properties from Firebase and update cache when the composable is first launched
     LaunchedEffect(Unit) {
-        Log.d("MapScreen", "Fetching properties")
         viewModel.fetchProperties()
     }
 
     // Remember the properties as state
-    val properties by remember { mutableStateOf(viewModel.properties) }
+    val properties by viewModel.properties.collectAsState()
 
     // Track selected marker
     var selectedProperty by remember { mutableStateOf<Property?>(null) }
@@ -72,8 +73,10 @@ fun MapScreen(viewModel: MapsViewModel) {
     val centerMapOnUserLocation: () -> Unit = {
         if (viewModel.currentLocation.value != null) {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(
-                LatLng(viewModel.currentLocation.value!!.latitude, viewModel.currentLocation.value!!.longitude),
-                defaultZoomLevel
+                LatLng(
+                    viewModel.currentLocation.value!!.latitude,
+                    viewModel.currentLocation.value!!.longitude
+                ), defaultZoomLevel
             )
         }
     }
@@ -125,12 +128,10 @@ fun MapScreen(viewModel: MapsViewModel) {
     val markerBitmaps = remember { mutableMapOf<Property, BitmapDescriptor>() }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
+        GoogleMap(modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
-                isMyLocationEnabled = viewModel.isMyLocationEnabled.value,
-                mapType = mapType
+                isMyLocationEnabled = viewModel.isMyLocationEnabled.value, mapType = mapType
             ),
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
@@ -142,25 +143,23 @@ fun MapScreen(viewModel: MapsViewModel) {
             },
             onMapClick = {
                 selectedProperty = null
-            }
-        ) {
+            }) {
             // Display markers for each property
             properties.forEach { property ->
                 val isSelected = property == selectedProperty
                 val icon = setCustomMapIcon(formatPrice(property.price), isSelected)
 
-                Marker(
-                    state = MarkerState(position = LatLng(property.lat, property.lng)),
+                Marker(state = MarkerState(position = LatLng(property.lat, property.lng)),
                     title = null,
                     snippet = null,
                     icon = icon,
                     onClick = {
                         selectedProperty = property
                         true
-                    }
-                )
+                    })
             }
         }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -168,8 +167,7 @@ fun MapScreen(viewModel: MapsViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(
-                modifier = Modifier
-                    .size(48.dp),
+                modifier = Modifier.size(48.dp),
                 shape = CircleShape,
                 color = LayersButtonColor,
                 contentColor = LayersIconColor
@@ -182,9 +180,7 @@ fun MapScreen(viewModel: MapsViewModel) {
                     } else {
                         MapType.NORMAL
                     }
-                }
-                )
-                {
+                }) {
                     Icon(
                         imageVector = Icons.Outlined.Layers,
                         contentDescription = "Layers",
@@ -193,8 +189,7 @@ fun MapScreen(viewModel: MapsViewModel) {
                 }
             }
             Surface(
-                modifier = Modifier
-                    .size(48.dp),
+                modifier = Modifier.size(48.dp),
                 shape = CircleShape,
                 color = LocationButtonColor,
                 contentColor = LocationIconColor
@@ -208,7 +203,11 @@ fun MapScreen(viewModel: MapsViewModel) {
                     } else {
                         locationPermissionsState.launchMultiplePermissionRequest()
                         if (!locationPermissionsState.allPermissionsGranted) {
-                            Toast.makeText(context, "Enable location for the Dwello app in Settings.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                context,
+                                "Enable location for the Dwello app in Settings.",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }) {
@@ -220,11 +219,20 @@ fun MapScreen(viewModel: MapsViewModel) {
                 }
             }
         }
+
+        // Display the selected property preview
+        if (selectedProperty != null) {
+            PropertyPreview(property = selectedProperty!!) {
+                navController.navigate("property_listing_page")
+            }
+        }
     }
 
     // Observe permission denial state and show a toast if permissions are denied
     if (viewModel.permissionDenied.value) {
-        Toast.makeText(context, "Enable location for the Dwello app in Settings.", Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            context, "Enable location for the Dwello app in Settings.", Toast.LENGTH_LONG
+        ).show()
         viewModel.permissionDenied.value = false
     }
 }

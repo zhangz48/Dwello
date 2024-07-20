@@ -143,6 +143,9 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:$kotlin_version"))
     implementation("com.google.android.libraries.places:places:3.5.0")
 
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
     // Kotlin

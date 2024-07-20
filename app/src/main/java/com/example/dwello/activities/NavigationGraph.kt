@@ -44,6 +44,7 @@ import com.example.dwello.ui.AccountScreen
 import com.example.dwello.ui.AuthScreen
 import com.example.dwello.ui.FavouritesScreen
 import com.example.dwello.ui.HomeScreen
+import com.example.dwello.ui.PropertyListingScreen
 import com.example.dwello.ui.SignUpScreen
 import com.example.dwello.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -148,13 +149,16 @@ fun NavigationHost(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(mapsViewModel)
+            HomeScreen(mapsViewModel, navController)
         }
         composable(Screen.Favourites.route) {
             FavouritesScreen()
         }
         composable(Screen.Account.route) {
             AccountScreen(authViewModel, navController)
+        }
+        composable("property_listing_page") {
+            PropertyListingScreen()
         }
         authNavGraph(navController, authViewModel)
     }

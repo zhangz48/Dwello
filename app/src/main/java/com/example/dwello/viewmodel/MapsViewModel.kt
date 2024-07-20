@@ -12,12 +12,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dwello.BuildConfig
 import com.example.dwello.data.Property
+import com.example.dwello.data.PropertyEntity
+import com.example.dwello.data.toDomain
+import com.example.dwello.data.toEntity
+import com.example.dwello.utils.DatabaseProvider
 import com.example.dwello.utils.GeocodingApiService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -32,17 +39,28 @@ class MapsViewModel(context: Context) : ViewModel() {
     val isMyLocationEnabled = mutableStateOf(false)
     val selectedPlace = mutableStateOf<Place?>(null)
 
-    private val db = FirebaseFirestore.getInstance()
-    val properties = mutableStateListOf<Property>()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val database = DatabaseProvider.getDatabase(context)
+
+    // Expose properties as StateFlow
+    private val _properties = MutableStateFlow<List<Property>>(emptyList())
+    val properties: StateFlow<List<Property>> get() = _properties
+
+//    val properties = mutableStateListOf<Property>()
+
     private val apiKey = BuildConfig.MAPS_API_KEY
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://maps.googleapis.com/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    private val retrofit = Retrofit.Builder().baseUrl("https://maps.googleapis.com/")
+        .addConverterFactory(GsonConverterFactory.create()).build()
 
     private val geocodingApiService = retrofit.create(GeocodingApiService::class.java)
 
+    private var propertyListener: ListenerRegistration? = null
+
+    init {
+        fetchProperties()
+        listenForPropertyUpdates()
+    }
 
     fun updateSelectedPlace(place: Place) {
         selectedPlace.value = place
@@ -63,11 +81,9 @@ class MapsViewModel(context: Context) : ViewModel() {
 
     fun enableMyLocation(context: Context) {
         if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                context, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                context, Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             isMyLocationEnabled.value = true
@@ -78,18 +94,12 @@ class MapsViewModel(context: Context) : ViewModel() {
     }
 
     fun onRequestPermissionsResult(
-        permissions: Array<String>,
-        grantResults: IntArray,
-        context: Context
+        permissions: Array<String>, grantResults: IntArray, context: Context
     ) {
         if (isPermissionGranted(
-                permissions,
-                grantResults,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION
             ) || isPermissionGranted(
-                permissions,
-                grantResults,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                permissions, grantResults, Manifest.permission.ACCESS_COARSE_LOCATION
             )
         ) {
             // Enable the my location layer if the permission has been granted.
@@ -102,9 +112,7 @@ class MapsViewModel(context: Context) : ViewModel() {
     }
 
     private fun isPermissionGranted(
-        permissions: Array<String>,
-        grantResults: IntArray,
-        permission: String
+        permissions: Array<String>, grantResults: IntArray, permission: String
     ): Boolean {
         for (i in permissions.indices) {
             if (permissions[i] == permission) {
@@ -115,28 +123,101 @@ class MapsViewModel(context: Context) : ViewModel() {
     }
 
     fun fetchProperties() {
-        db.collection("properties").get()
-            .addOnSuccessListener { documents ->
-                properties.clear()
+        viewModelScope.launch {
+            // Load cached properties first
+            val cachedProperties = database.propertyDao().getAllProperties()
+            _properties.value = cachedProperties.map { it.toDomain() }
+//            properties.clear()
+//            properties.addAll(cachedProperties.map { it.toDomain() })
+
+            // Fetch properties from Firestore
+            firestore.collection("properties").get().addOnSuccessListener { documents ->
+                val fetchedProperties = mutableListOf<PropertyEntity>()
                 for (document in documents) {
                     var property = document.toObject(Property::class.java).copy(pid = document.id)
+
+                    // Log each property to verify correct fetching
+                    Log.d("MapsViewModel", "Fetched property: $property")
+
                     if (property.lat == 0.0 && property.lng == 0.0) {
-                        val address = "${property.street}, ${property.city}, ${property.state}, ${property.zipcode}"
+                        val address =
+                            "${property.street}, ${property.city}, ${property.state}, ${property.zipcode}"
                         viewModelScope.launch {
                             val latLng = getLatLonForAddress(address)
                             latLng?.let { latLngValue ->
-                                property = property.copy(lat = latLngValue.latitude, lng = latLngValue.longitude)
+                                property = property.copy(
+                                    lat = latLngValue.latitude, lng = latLngValue.longitude
+                                )
                                 // Update property in Firestore with the new lat/lng
-                                db.collection("properties").document(property.pid).set(property)
+                                firestore.collection("properties").document(property.pid).set(property)
                             }
                         }
                     }
-                    properties.add(property)
+                    fetchedProperties.add(property.toEntity())
                 }
-            }
-            .addOnFailureListener { exception ->
+                viewModelScope.launch {
+                    database.propertyDao().deleteAll()
+                    database.propertyDao().insertAll(fetchedProperties)
+                    _properties.value = fetchedProperties.map { it.toDomain() }
+//                    properties.clear()
+//                    properties.addAll(fetchedProperties.map { it.toDomain() })
+                }
+            }.addOnFailureListener { exception ->
                 Log.w("MapsViewModel", "Error getting documents: ", exception)
             }
+        }
+    }
+
+    private fun listenForPropertyUpdates() {
+        propertyListener = firestore.collection("properties")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w("MapsViewModel", "listen:error", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshots != null && !snapshots.isEmpty) {
+                    val updatedProperties = mutableListOf<PropertyEntity>()
+                    for (document in snapshots.documents) {
+                        var property = document.toObject(Property::class.java)?.copy(pid = document.id)
+
+                        // Log each property to verify correct fetching
+                        Log.d("MapsViewModel", "Real-time update property: $property")
+
+                        if (property != null) {
+                            if (property.lat == 0.0 && property.lng == 0.0) {
+                                val address =
+                                    "${property.street}, ${property.city}, ${property.state}, ${property.zipcode}"
+                                viewModelScope.launch {
+                                    val latLng = getLatLonForAddress(address)
+                                    latLng?.let { latLngValue ->
+                                        property = property!!.copy(
+                                            lat = latLngValue.latitude, lng = latLngValue.longitude
+                                        )
+                                        // Update property in Firestore with the new lat/lng
+                                        firestore.collection("properties").document(property!!.pid).set(
+                                            property!!
+                                        )
+                                    }
+                                }
+                            }
+                            updatedProperties.add(property!!.toEntity())
+                        }
+                    }
+                    viewModelScope.launch {
+                        database.propertyDao().deleteAll()
+                        database.propertyDao().insertAll(updatedProperties)
+                        _properties.value = updatedProperties.map { it.toDomain() }
+//                        properties.clear()
+//                        properties.addAll(updatedProperties.map { it.toDomain() })
+                    }
+                }
+            }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        propertyListener?.remove()
     }
 
     suspend fun getLatLonForAddress(address: String): LatLng? {

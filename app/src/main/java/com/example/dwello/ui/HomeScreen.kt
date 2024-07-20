@@ -28,6 +28,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.currentplacedetailsonmap.MapScreen
 import com.example.dwello.BuildConfig
 import com.example.dwello.R
@@ -38,7 +39,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
 @Composable
-fun HomeScreen(mapsViewModel: MapsViewModel) {
+fun HomeScreen(mapsViewModel: MapsViewModel, navController: NavController) {
     Log.d("HomeScreen", "HomeScreen Composable rendered")
 
     var isMapMode by remember { mutableStateOf(true) }
@@ -174,7 +175,7 @@ fun HomeScreen(mapsViewModel: MapsViewModel) {
 
         // Screen section based on mode
         if (isMapMode) {
-            MapScreen(viewModel = mapsViewModel)
+            MapScreen(viewModel = mapsViewModel, navController = navController)
         } else {
             Box(
                 modifier = Modifier
