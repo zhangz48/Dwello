@@ -17,12 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.dwello.activities.Screen
 import com.example.dwello.data.Property
 import com.example.dwello.ui.components.PropertyPreview
 import com.example.dwello.ui.theme.*
 import com.example.dwello.ui.components.formatPrice
 import com.example.dwello.ui.components.setCustomMapIcon
 import com.example.dwello.viewmodel.MapsViewModel
+import com.example.dwello.viewmodel.PropertyViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -34,7 +36,9 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
+fun MapScreen(mapsViewModel: MapsViewModel,
+              propertyViewModel: PropertyViewModel,
+              navController: NavController) {
     Log.d("MapScreen", "MapScreen Composable rendered")
 
     val context = LocalContext.current
@@ -42,11 +46,11 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
 
     // Fetch properties from Firebase and update cache when the composable is first launched
     LaunchedEffect(Unit) {
-        viewModel.fetchProperties()
+        propertyViewModel.fetchProperties()
     }
 
     // Remember the properties as state
-    val properties by viewModel.properties.collectAsState()
+    val properties by propertyViewModel.properties.collectAsState()
 
     // Track selected marker
     var selectedProperty by remember { mutableStateOf<Property?>(null) }
@@ -71,11 +75,11 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
 
     // Function to center the map on the user's location
     val centerMapOnUserLocation: () -> Unit = {
-        if (viewModel.currentLocation.value != null) {
+        if (mapsViewModel.currentLocation.value != null) {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(
                 LatLng(
-                    viewModel.currentLocation.value!!.latitude,
-                    viewModel.currentLocation.value!!.longitude
+                    mapsViewModel.currentLocation.value!!.latitude,
+                    mapsViewModel.currentLocation.value!!.longitude
                 ), defaultZoomLevel
             )
         }
@@ -84,8 +88,8 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
     // Ensure permissions are granted and location is fetched
     LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
         if (locationPermissionsState.allPermissionsGranted) {
-            viewModel.getCurrentLocation(context)
-            viewModel.enableMyLocation(context)
+            mapsViewModel.getCurrentLocation(context)
+            mapsViewModel.enableMyLocation(context)
         }
     }
 
@@ -131,7 +135,7 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
         GoogleMap(modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
-                isMyLocationEnabled = viewModel.isMyLocationEnabled.value, mapType = mapType
+                isMyLocationEnabled = mapsViewModel.isMyLocationEnabled.value, mapType = mapType
             ),
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
@@ -197,8 +201,8 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
                 IconButton(onClick = {
                     isLocationButtonBlinking = true
                     if (locationPermissionsState.allPermissionsGranted) {
-                        viewModel.enableMyLocation(context)
-                        viewModel.getCurrentLocation(context)
+                        mapsViewModel.enableMyLocation(context)
+                        mapsViewModel.getCurrentLocation(context)
                         centerMapOnUserLocation()
                     } else {
                         locationPermissionsState.launchMultiplePermissionRequest()
@@ -229,17 +233,17 @@ fun MapScreen(viewModel: MapsViewModel, navController: NavController) {
                 contentAlignment = Alignment.BottomCenter // Center the PropertyPreview at the bottom
             ) {
                 PropertyPreview(property = selectedProperty!!) {
-                    navController.navigate("property_listing_page")
+                    navController.navigate(Screen.PropertyListing.createRoute(selectedProperty!!.pid))
                 }
             }
         }
     }
 
     // Observe permission denial state and show a toast if permissions are denied
-    if (viewModel.permissionDenied.value) {
+    if (mapsViewModel.permissionDenied.value) {
         Toast.makeText(
             context, "Enable location for the Dwello app in Settings.", Toast.LENGTH_LONG
         ).show()
-        viewModel.permissionDenied.value = false
+        mapsViewModel.permissionDenied.value = false
     }
 }

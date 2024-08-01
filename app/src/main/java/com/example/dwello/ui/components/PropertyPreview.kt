@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.dwello.R
 import com.example.dwello.data.Property
 import java.text.NumberFormat
@@ -61,22 +64,33 @@ fun PropertyPreview(property: Property, onClick: () -> Unit) {
         Column (
             modifier = Modifier.background(Color.White)
         ) {
-            val image: Painter = painterResource(id = R.drawable.placeholder_image) // Use the PNG drawable
-            Image(
-                painter = image,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(190.dp),
-                contentScale = ContentScale.Crop
-            )
-            HomeDetails(property)
+            PropertyPhoto(property)
+            PropertyDetails(property)
         }
     }
 }
 
 @Composable
-fun HomeDetails(property: Property) {
+fun PropertyPhoto(property: Property) {
+    // Use Coil for loading images with placeholders and error handling
+//    AsyncImage(
+//        model = ImageRequest.Builder(LocalContext.current)
+//            .data(property.thumbnail_url)
+//            .crossfade(true)
+//            .build(),
+//        placeholder = painterResource(R.drawable.loading_img), // Loading image while loading
+//        error = painterResource(R.drawable.ic_broken_image), // Error image if load fails
+//        contentDescription = null,
+//        contentScale = ContentScale.Crop,
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .height(190.dp)
+//    )
+    ImageSlider(property.image_urls, 190)
+}
+
+@Composable
+fun PropertyDetails(property: Property) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US).apply {
         maximumFractionDigits = 0
     }
@@ -143,7 +157,8 @@ fun HomeDetails(property: Property) {
         Spacer(modifier = Modifier.height(0.dp))
         Text(
             text = "${property.street}, ${property.city}, ${property.state}",
-            style = MaterialTheme.typography.bodyMedium.copy(            color = Color.Black,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color.Black,
                 fontSize = 16.sp),
         )
     }

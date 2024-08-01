@@ -148,6 +148,10 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    // Image Swipe
+    implementation("com.google.accompanist:accompanist-pager:0.24.13-rc")
+    implementation("androidx.compose.foundation:foundation:1.6.8")
+
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
     // Kotlin

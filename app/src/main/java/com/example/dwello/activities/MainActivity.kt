@@ -36,6 +36,8 @@ import com.example.dwello.utils.logBackStack
 import com.example.dwello.viewmodel.AuthViewModel
 import com.example.dwello.viewmodel.MapsViewModel
 import com.example.dwello.viewmodel.MapsViewModelFactory
+import com.example.dwello.viewmodel.PropertyViewModel
+import com.example.dwello.viewmodel.PropertyViewModelFactory
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -60,6 +62,9 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var auth: FirebaseAuth
     private val authViewModel: AuthViewModel by viewModels()
+    private val propertyViewModel: PropertyViewModel by viewModels {
+        PropertyViewModelFactory(applicationContext)
+    }
     private val mapsViewModel: MapsViewModel by viewModels {
         MapsViewModelFactory(applicationContext)
     }
@@ -81,36 +86,12 @@ class MainActivity : FragmentActivity() {
         // Initialize the SDK
         Places.initialize(applicationContext, apiKey)
 
-        // Create a new PlacesClient instance
-        val placesClient = Places.createClient(this)
-
-//        // Initialize the AutocompleteSupportFragment.
-//        val autocompleteFragment =
-//            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
-//                    as AutocompleteSupportFragment
-//
-//        // Specify the types of place data to return.
-//        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
-//
-//        // Set up a PlaceSelectionListener to handle the response.
-//        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-//            override fun onPlaceSelected(place: Place) {
-//                // TODO: Get info about the selected place.
-//                Log.i(TAG, "Place: ${place.name}, ${place.id}")
-//                mapsViewModel.updateSelectedPlace(place)
-//            }
-//
-//            override fun onError(status: Status) {
-//                // TODO: Handle the error.
-//                Log.i(TAG, "An error occurred: $status")
-//            }
-//        })
-
         setContent {
             DwelloTheme {
                 MainScreen(
                     authViewModel = authViewModel,
-                    mapsViewModel = mapsViewModel
+                    mapsViewModel = mapsViewModel,
+                    propertyViewModel = propertyViewModel
                 )
             }
         }
@@ -118,14 +99,18 @@ class MainActivity : FragmentActivity() {
 }
 
 @Composable
-fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
+fun MainScreen(
+    authViewModel: AuthViewModel,
+    mapsViewModel: MapsViewModel,
+    propertyViewModel: PropertyViewModel
+) {
     val navController = rememberNavController()
-//    val currentBackStack by navController.currentBackStackEntryAsState()
-//    val currentDestination = currentBackStack?.destination
-//    val currentScreen = bottomNavigationScreens.find { it.route == currentDestination?.route } ?: Screen.Home
     val isLoggedIn by authViewModel.user.collectAsState()
     var selectedTab by remember { mutableStateOf<Screen>(Screen.Home) }
     var redirectScreen by rememberSaveable { mutableStateOf<Screen?>(null)}
+    val currentBackStack by navController.currentBackStackEntryAsState()
+    val currentDestination = currentBackStack?.destination
+    val currentRoute = currentDestination?.route
 
     Log.d("MainScreen", "MainScreen Composable rendered")
 
@@ -150,29 +135,31 @@ fun MainScreen(authViewModel: AuthViewModel, mapsViewModel: MapsViewModel) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                allScreens = bottomNavigationScreens,
-                onTabSelected = { newScreen ->
-                    selectedTab = newScreen
-                    if (isLoggedIn != null || newScreen == Screen.Home) {
-                        navController.navigateSingleTopTo(newScreen.route)
-                    } else {
-                        redirectScreen = newScreen
-                        Log.d("MainScreen", "User not logged in, redirecting to AuthScreen")
-                        navController.navigateSingleTopTo(AuthScreen.Auth.route)
-                    }
-                },
-                currentScreen = selectedTab,
-            )
+            // Show NavigationBar only if the current screen is NOT PropertyListing
+            if (currentRoute != Screen.PropertyListing.route) {
+                NavigationBar(
+                    allScreens = bottomNavigationScreens,
+                    onTabSelected = { newScreen ->
+                        selectedTab = newScreen
+                        if (isLoggedIn != null || newScreen == Screen.Home) {
+                            navController.navigateSingleTopTo(newScreen.route)
+                        } else {
+                            redirectScreen = newScreen
+                            Log.d("MainScreen", "User not logged in, redirecting to AuthScreen")
+                            navController.navigateSingleTopTo(AuthScreen.Auth.route)
+                        }
+                    },
+                    currentScreen = selectedTab,
+                )
+            }
         }
     ) { innerPadding ->
         NavigationHost(
             navController = navController,
             modifier = Modifier.padding(innerPadding),
-            //isLoggedIn = isLoggedIn != null,
             authViewModel = authViewModel,
-            //redirectScreen = redirectScreen,
-            mapsViewModel = mapsViewModel
+            mapsViewModel = mapsViewModel,
+            propertyViewModel = propertyViewModel
         )
     }
 }

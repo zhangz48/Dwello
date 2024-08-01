@@ -21,14 +21,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.example.dwello.utils.logBackStack
-import com.example.dwello.viewmodel.MapsViewModel
+import com.example.dwello.viewmodel.PropertyViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun AccountScreen(
     authViewModel: AuthViewModel,
     navController: NavHostController,
-    mapsViewModel: MapsViewModel
+    propertyViewModel: PropertyViewModel
 ) {
 
     Log.d("AccountScreen", "AccountScreen Composable rendered")
@@ -47,7 +47,7 @@ fun AccountScreen(
 
         AccountItem("About")
 
-        ClearCacheButton(mapsViewModel)
+        ClearCacheButton(propertyViewModel)
 
         Spacer(modifier = Modifier.weight(1f))
         SignOutButton(authViewModel, navController)
@@ -97,7 +97,7 @@ fun AccountItem(title: String) {
 }
 
 @Composable
-fun ClearCacheButton(mapsViewModel: MapsViewModel) {
+fun ClearCacheButton(propertyViewModel: PropertyViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -110,7 +110,7 @@ fun ClearCacheButton(mapsViewModel: MapsViewModel) {
         Button(
             onClick = {
                 coroutineScope.launch {
-                    mapsViewModel.clearLocalDatabase()
+                    propertyViewModel.clearLocalDatabase()
                     Toast.makeText(context, "Cache cleared", Toast.LENGTH_SHORT).show()
                 }
             }

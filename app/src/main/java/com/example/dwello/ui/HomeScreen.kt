@@ -34,12 +34,17 @@ import com.example.dwello.BuildConfig
 import com.example.dwello.R
 import com.example.dwello.ui.theme.*
 import com.example.dwello.viewmodel.MapsViewModel
+import com.example.dwello.viewmodel.PropertyViewModel
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
 @Composable
-fun HomeScreen(mapsViewModel: MapsViewModel, navController: NavController) {
+fun HomeScreen(
+    mapsViewModel: MapsViewModel,
+    propertyViewModel: PropertyViewModel,
+    navController: NavController
+) {
     Log.d("HomeScreen", "HomeScreen Composable rendered")
 
     var isMapMode by remember { mutableStateOf(true) }
@@ -175,7 +180,10 @@ fun HomeScreen(mapsViewModel: MapsViewModel, navController: NavController) {
 
         // Screen section based on mode
         if (isMapMode) {
-            MapScreen(viewModel = mapsViewModel, navController = navController)
+            MapScreen(
+                mapsViewModel = mapsViewModel,
+                propertyViewModel = propertyViewModel,
+                navController = navController)
         } else {
             Box(
                 modifier = Modifier

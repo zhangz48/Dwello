@@ -50,6 +50,7 @@ import com.example.dwello.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.dwello.utils.logBackStack
 import com.example.dwello.viewmodel.MapsViewModel
+import com.example.dwello.viewmodel.PropertyViewModel
 
 sealed class Screen(
     val route: String,
@@ -59,6 +60,9 @@ sealed class Screen(
     object Home : Screen("home", "Find Homes", Icons.Outlined.Home)
     object Favourites : Screen("favourites", "Favourites", Icons.Outlined.FavoriteBorder)
     object Account : Screen("account", "My Account", Icons.Outlined.Person)
+    object PropertyListing : Screen("property/{propertyId}", "", Icons.Filled.Home) {
+        fun createRoute(propertyId: String) = "property/$propertyId"
+    }
 }
 
 sealed class AuthScreen(val route: String) {
@@ -138,10 +142,9 @@ fun NavigationBar(
 fun NavigationHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    //isLoggedIn: Boolean,
     authViewModel: AuthViewModel,
-    //redirectScreen: Screen?,
-    mapsViewModel: MapsViewModel
+    mapsViewModel: MapsViewModel,
+    propertyViewModel: PropertyViewModel
 ) {
     NavHost(
         navController = navController,
@@ -149,17 +152,15 @@ fun NavigationHost(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(mapsViewModel, navController)
+            HomeScreen(mapsViewModel, propertyViewModel, navController)
         }
         composable(Screen.Favourites.route) {
             FavouritesScreen()
         }
         composable(Screen.Account.route) {
-            AccountScreen(authViewModel, navController, mapsViewModel)
+            AccountScreen(authViewModel, navController, propertyViewModel)
         }
-        composable("property_listing_page") {
-            PropertyListingScreen()
-        }
+        propertyNavGraph(navController, propertyViewModel)
         authNavGraph(navController, authViewModel)
     }
 }
@@ -187,6 +188,19 @@ fun NavGraphBuilder.authNavGraph(
                 onSignUpSuccess = { navController.navigate(AuthScreen.Auth.route) },
                 authViewModel = authViewModel
             )
+        }
+    }
+}
+
+fun NavGraphBuilder.propertyNavGraph(
+    navController: NavHostController,
+    propertyViewModel: PropertyViewModel
+) {
+    composable(Screen.PropertyListing.route) { backStackEntry ->
+        val propertyId = backStackEntry.arguments?.getString("propertyId")
+        val property = propertyViewModel.getPropertyById(propertyId)
+        property?.let {
+            PropertyListingScreen(navController, it)
         }
     }
 }
