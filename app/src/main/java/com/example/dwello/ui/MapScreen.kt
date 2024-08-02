@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.dwello.activities.Screen
 import com.example.dwello.data.Property
+import com.example.dwello.ui.components.PropertyClusteringMapContent
 import com.example.dwello.ui.components.PropertyPreview
 import com.example.dwello.ui.theme.*
 import com.example.dwello.ui.components.formatPrice
@@ -30,6 +31,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
 
@@ -42,7 +44,6 @@ fun MapScreen(mapsViewModel: MapsViewModel,
     Log.d("MapScreen", "MapScreen Composable rendered")
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     // Fetch properties from Firebase and update cache when the composable is first launched
     LaunchedEffect(Unit) {
@@ -128,9 +129,6 @@ fun MapScreen(mapsViewModel: MapsViewModel,
         }
     }
 
-    // Cache bitmaps for custom markers
-    val markerBitmaps = remember { mutableMapOf<Property, BitmapDescriptor>() }
-
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap(modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
@@ -143,11 +141,12 @@ fun MapScreen(mapsViewModel: MapsViewModel,
                 rotationGesturesEnabled = true
             ),
             onMapLoaded = {
-                // Optionally, do something when the map is loaded
+
             },
             onMapClick = {
                 selectedProperty = null
             }) {
+            // PropertyClusteringMapContent(properties = properties)
             // Display markers for each property
             properties.forEach { property ->
                 val isSelected = property == selectedProperty

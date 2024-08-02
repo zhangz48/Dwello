@@ -17,7 +17,7 @@ class DwelloApplication : Application() {
             applicationContext,
             AppDatabase::class.java,
             "dwello-database"
-        ).fallbackToDestructiveMigration() // This is crucial to avoid migration errors
+        ).fallbackToDestructiveMigration()
             .build()
     }
 }

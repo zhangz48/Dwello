@@ -9,11 +9,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,12 +48,19 @@ fun FavouritesScreen(
     val savedProperties by propertyViewModel.favouriteProperties.collectAsState()
     Log.d("FavouritesScreen", "Saved properties: ${savedProperties.size}")
 
+    var sortOption by remember { mutableStateOf("Saved Date (recent to old)") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp, 16.dp, 16.dp, 0.dp)
     ) {
-        TopBar(savedProperties.size)
+        TopBar(savedProperties.size,
+            sortOption,
+            onSortOptionSelected = { option ->
+            sortOption = option
+            propertyViewModel.sortProperties(option) }
+        )
         if (savedProperties.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -76,7 +87,13 @@ fun FavouritesScreen(
 }
 
 @Composable
-fun TopBar(homeCount: Int) {
+fun TopBar(
+    homeCount: Int,
+    sortOption: String,
+    onSortOptionSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -91,18 +108,98 @@ fun TopBar(homeCount: Int) {
                 fontSize = 24.sp
             )
         )
-        IconButton(onClick = { /* Handle sort click */ }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Sort,
-                contentDescription = "Sort",
-                tint = Color.Black
-            )
+        Box {
+            IconButton(onClick = { expanded = true }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Sort,
+                    contentDescription = "Sort",
+                    tint = Color.Black
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.White)
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Saved Date (recent to old)") },
+                    onClick = {
+                        onSortOptionSelected("Saved Date (recent to old)")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Saved Date (recent to old)") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Saved Date (old to recent)") },
+                    onClick = {
+                        onSortOptionSelected("Saved Date (old to recent)")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Saved Date (old to recent)") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Price (high to low)") },
+                    onClick = {
+                        onSortOptionSelected("Price (high to low)")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Price (high to low)") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Price (low to high)") },
+                    onClick = {
+                        onSortOptionSelected("Price (low to high)")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Price (low to high)") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Square Feet") },
+                    onClick = {
+                        onSortOptionSelected("Square Feet")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Square Feet") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Newest Built") },
+                    onClick = {
+                        onSortOptionSelected("Newest Built")
+                        expanded = false
+                    },
+                    trailingIcon = {
+                        if (sortOption == "Newest Built") {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                )
+            }
         }
     }
     Text(
         text = "$homeCount homes",
         style = MaterialTheme.typography.bodyMedium,
-        color = Color.Gray
+        color = Color.Black
     )
 }
 

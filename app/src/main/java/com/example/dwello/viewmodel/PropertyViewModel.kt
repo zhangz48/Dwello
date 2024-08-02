@@ -247,4 +247,16 @@ class PropertyViewModel(context: Context) : ViewModel() {
             }
         }
     }
+
+    fun sortProperties(option: String) {
+        _favouriteProperties.value = when (option) {
+            "Saved Date (recent to old)" -> _favouriteProperties.value.sortedByDescending { it.list_date }
+            "Saved Date (old to recent)" -> _favouriteProperties.value.sortedBy { it.list_date }
+            "Price (high to low)" -> _favouriteProperties.value.sortedByDescending { it.price }
+            "Price (low to high)" -> _favouriteProperties.value.sortedBy { it.price }
+            "Square Feet" -> _favouriteProperties.value.sortedByDescending { it.sqft }
+            "Newest Built" -> _favouriteProperties.value.sortedByDescending { it.built_year }
+            else -> _favouriteProperties.value
+        }
+    }
 }
