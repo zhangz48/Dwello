@@ -161,13 +161,14 @@ fun NavigationHost(
             AccountScreen(authViewModel, navController, propertyViewModel)
         }
         propertyNavGraph(navController, propertyViewModel)
-        authNavGraph(navController, authViewModel)
+        authNavGraph(navController, authViewModel, propertyViewModel)
     }
 }
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    propertyViewModel: PropertyViewModel
 ) {
     navigation(
         startDestination = AuthScreen.Auth.route,
@@ -177,7 +178,7 @@ fun NavGraphBuilder.authNavGraph(
             AuthScreen(
                 onSignUpClick = { navController.navigate(AuthScreen.SignUp.route) },
                 onSignInClick = { email, password ->
-                    authViewModel.signIn(email, password)
+                    authViewModel.signIn(email, password, propertyViewModel)
                 },
                 authViewModel = authViewModel
             )

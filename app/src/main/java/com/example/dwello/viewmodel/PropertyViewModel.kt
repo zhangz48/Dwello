@@ -259,4 +259,9 @@ class PropertyViewModel(context: Context) : ViewModel() {
             else -> _favouriteProperties.value
         }
     }
+
+    fun clearUserData() {
+        _favouriteProperties.value = emptyList()
+        _favouriteStatus.value = emptyMap()
+    }
 }

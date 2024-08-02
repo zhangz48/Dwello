@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dwello.activities.customFontFamily
 import com.example.dwello.viewmodel.AuthViewModel
+import com.example.dwello.viewmodel.PropertyViewModel
 import com.example.dwello.viewmodel.SignInState
 
 
@@ -40,7 +41,6 @@ fun AuthScreen(
     onSignUpClick: () -> Unit,
     onSignInClick: (email: String, password: String) -> Unit,
     authViewModel: AuthViewModel,
-    //selectedTab: String? = null
 ) {
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }

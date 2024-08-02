@@ -26,13 +26,19 @@ class AuthViewModel : ViewModel() {
     private val _signInState = MutableStateFlow<SignInState>(SignInState.Idle)
     val signInState: StateFlow<SignInState> = _signInState
 
-    fun signIn(email: String, password: String) {
+    fun signIn(email: String, password: String, propertyViewModel: PropertyViewModel) {
         viewModelScope.launch {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Log.d("AuthViewModel", "signInWithEmail:success")
                         _user.value = auth.currentUser
+
+                        // Fetch properties and favorite properties for the new user
+                        propertyViewModel.clearUserData()  // Clear any previous data
+                        propertyViewModel.fetchFavouriteProperties()
+                        propertyViewModel.fetchProperties()
+
                         _signInState.value = SignInState.Success
                     } else {
                         Log.w("AuthViewModel", "signInWithEmail:failure", task.exception)
@@ -81,9 +87,10 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signOut() {
+    fun signOut(propertyViewModel: PropertyViewModel) {
         auth.signOut()
         _user.value = null
+        propertyViewModel.clearUserData()
     }
 
     fun sendPasswordReset(email: String) {

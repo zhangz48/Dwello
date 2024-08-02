@@ -50,7 +50,7 @@ fun AccountScreen(
         ClearCacheButton(propertyViewModel)
 
         Spacer(modifier = Modifier.weight(1f))
-        SignOutButton(authViewModel, navController)
+        SignOutButton(authViewModel, propertyViewModel, navController)
     }
     Log.d("AccountScreen", "Account screen called")
 }
@@ -111,6 +111,9 @@ fun ClearCacheButton(propertyViewModel: PropertyViewModel) {
             onClick = {
                 coroutineScope.launch {
                     propertyViewModel.clearLocalDatabase()
+                    propertyViewModel.clearUserData()
+                    propertyViewModel.fetchProperties()
+                    propertyViewModel.fetchFavouriteProperties()
                     Toast.makeText(context, "Cache cleared", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -128,7 +131,10 @@ fun ClearCacheButton(propertyViewModel: PropertyViewModel) {
 }
 
 @Composable
-fun SignOutButton(authViewModel: AuthViewModel, navController: NavHostController) {
+fun SignOutButton(
+    authViewModel: AuthViewModel,
+    propertyViewModel: PropertyViewModel,
+    navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,12 +143,8 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavHostController
     ) {
         TextButton(
             onClick = {
-                authViewModel.signOut()
+                authViewModel.signOut(propertyViewModel)
                 navController.navigate(com.example.dwello.activities.AuthScreen.Auth.route) {
-//                    popUpTo(navController.graph.startDestinationId) {
-//                        saveState = true
-//                        inclusive = true
-//                    }
                 }
                 navController.logBackStack() // Log the back stack after navigation
             }
