@@ -12,22 +12,39 @@ import com.example.dwello.data.toEntity
 import com.example.dwello.utils.DatabaseProvider
 import com.example.dwello.utils.GeocodingApiService
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
 
 class PropertyViewModel(context: Context) : ViewModel() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val database = DatabaseProvider.getDatabase(context)
+    private val auth = FirebaseAuth.getInstance()
 
     // Expose properties as StateFlow
     private val _properties = MutableStateFlow<List<Property>>(emptyList())
     val properties: StateFlow<List<Property>> get() = _properties
+
+    // Expose favorite properties as StateFlow
+    private val _favouriteProperties = MutableStateFlow<List<Property>>(emptyList())
+    val favouriteProperties: StateFlow<List<Property>> get() = _favouriteProperties
+
+    // Cache favourite status in a Map
+    private val _favouriteStatus = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    val favouriteStatus: StateFlow<Map<String, Boolean>> get() = _favouriteStatus
 
     private val apiKey = BuildConfig.MAPS_API_KEY
 
@@ -41,6 +58,7 @@ class PropertyViewModel(context: Context) : ViewModel() {
     init {
         fetchProperties()
         listenForPropertyUpdates()
+        fetchFavouriteProperties()
     }
 
     fun getPropertyById(propertyId: String?): Property? {
@@ -151,6 +169,82 @@ class PropertyViewModel(context: Context) : ViewModel() {
         } catch (e: Exception) {
             Log.e("PropertyViewModel", "Geocoding API error: ${e.message}")
             null
+        }
+    }
+
+    // Add a property to user's favourites in the saved_listings field
+    fun addPropertyToFavourites(propertyId: String) {
+        val currentUser = auth.currentUser ?: return
+        val userRef = firestore.collection("users").document(currentUser.uid)
+
+        viewModelScope.launch {
+            try {
+                userRef.update("saved_listings", FieldValue.arrayUnion(propertyId)).await()
+                _favouriteStatus.value = _favouriteStatus.value.toMutableMap().apply {
+                    this[propertyId] = true
+                }
+                fetchFavouriteProperties()
+                Log.d("PropertyViewModel", "Property added to favourites")
+            } catch (e: Exception) {
+                Log.e("PropertyViewModel", "Failed to add property to favourites", e)
+            }
+        }
+    }
+
+    // Remove a property from user's favourites in the saved_listings field
+    fun removePropertyFromFavourites(propertyId: String) {
+        val currentUser = auth.currentUser ?: return
+        val userRef = firestore.collection("users").document(currentUser.uid)
+
+        viewModelScope.launch {
+            try {
+                userRef.update("saved_listings", FieldValue.arrayRemove(propertyId)).await()
+                _favouriteStatus.value = _favouriteStatus.value.toMutableMap().apply {
+                    this[propertyId] = false
+                }
+                fetchFavouriteProperties()
+                Log.d("PropertyViewModel", "Property removed from favourites")
+            } catch (e: Exception) {
+                Log.e("PropertyViewModel", "Failed to remove property from favourites", e)
+            }
+        }
+    }
+
+    fun isPropertyFavourited(propertyId: String): StateFlow<Boolean> {
+        return _favouriteStatus.map { it[propertyId] ?: false }.stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            false
+        )
+    }
+
+    // Update favourite properties and cache the status
+    fun fetchFavouriteProperties() {
+        val currentUser = auth.currentUser ?: return
+        val userRef = firestore.collection("users").document(currentUser.uid)
+
+        viewModelScope.launch {
+            try {
+                // Fetch the saved_listings array from the user's document
+                val userDoc = userRef.get().await()
+                val favouriteIds = userDoc["saved_listings"] as? List<String> ?: emptyList()
+
+                if (favouriteIds.isNotEmpty()) {
+                    val propertiesRef = firestore.collection("properties")
+                    val propertiesSnapshot = propertiesRef.whereIn(FieldPath.documentId(), favouriteIds).get().await()
+                    val properties = propertiesSnapshot.documents.map { doc ->
+                        doc.toObject(Property::class.java)?.copy(pid = doc.id)
+                    }.filterNotNull()
+
+                    _favouriteStatus.value = favouriteIds.associateWith { true }
+                    _favouriteProperties.value = properties
+                } else {
+                    _favouriteStatus.value = emptyMap()
+                    _favouriteProperties.value = emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("PropertyViewModel", "Failed to load favourite properties", e)
+            }
         }
     }
 }

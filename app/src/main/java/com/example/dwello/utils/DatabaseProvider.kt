@@ -3,8 +3,6 @@ package com.example.dwello.utils
 import android.content.Context
 import androidx.room.Room
 import com.example.dwello.repositories.AppDatabase
-import com.example.dwello.repositories.MIGRATION_1_2
-
 
 object DatabaseProvider {
     private var INSTANCE: AppDatabase? = null

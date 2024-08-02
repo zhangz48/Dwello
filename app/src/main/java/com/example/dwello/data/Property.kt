@@ -17,6 +17,7 @@ data class Property(
     @PropertyName("image_urls") val image_urls: List<String> = emptyList(),
     @PropertyName("list_date") val list_date: Timestamp = Timestamp.now(),
     @PropertyName("parking_space") val parking_space: Int = 0,
+    @PropertyName("phone_number") val phone_number: String = "",
     @PropertyName("price") val price: Long = 0,
     @PropertyName("property_type") val property_type: String = "",
     @PropertyName("state") val state: String = "",

@@ -19,6 +19,7 @@ data class PropertyEntity(
     val image_urls: List<String>,
     val list_date: Long,
     val parking_space: Int,
+    val phone_number: String,
     val price: Long,
     val property_type: String,
     val state: String,

@@ -1,87 +1,68 @@
 package com.example.dwello.ui.components
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.example.dwello.R
 import com.example.dwello.data.Property
+import com.example.dwello.R
 import com.example.dwello.ui.theme.*
 import com.example.dwello.viewmodel.PropertyViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun PropertyPreview(
+fun PropertyPreviewFav(
     propertyViewModel: PropertyViewModel,
     property: Property,
-    onClick: () -> Unit,
-) {
+    onClick: () -> Unit) {
+
+    val context = LocalContext.current
     val isFavourited by propertyViewModel.isPropertyFavourited(property.pid).collectAsState()
 
     Box(
         modifier = Modifier
-            .width(380.dp)
-            .padding(vertical = 8.dp)
+            .padding(2.dp, 8.dp)
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(0.dp)
                 .clickable { onClick() },
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(2.dp)
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(
                 modifier = Modifier.background(Color.White)
             ) {
-                PropertyPhoto(property)
-                PropertyDetails(property)
+                PropertyPhotoFav(property)
+                PropertyDetailsFav(property, context)
             }
         }
 
@@ -95,27 +76,26 @@ fun PropertyPreview(
                     propertyViewModel.addPropertyToFavourites(property.pid)
                     Log.d("PropertyPreviewFav", "Adding property ${property.pid} to favourites")
                 }
-                Log.d("PropertyPreviewFav", "Favourite button clicked and Favourite status: $isFavourited")
             },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(14.dp)
-                .size(36.dp)
+                .size(66.dp)
+                .padding(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(44.dp)
                     .padding(0.dp)
                     .background(TransparentWhite, shape = RoundedCornerShape(50)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (isFavourited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (isFavourited) "Remove from favourites" else "Add to favourites",
+                    contentDescription = if (isFavourited) "Remove from favorites" else "Add to favorites",
                     tint = if (isFavourited) Red100 else Color.White,
                     modifier = Modifier
                         .size(36.dp)
-                        .padding(3.dp)
+                        .padding(2.dp)
                 )
             }
         }
@@ -123,14 +103,12 @@ fun PropertyPreview(
 }
 
 @Composable
-fun PropertyPhoto(property: Property) {
-    ImageSlider(property.image_urls, 190)
+fun PropertyPhotoFav(property: Property) {
+    ImageSlider(property.image_urls, 200)
 }
 
 @Composable
-fun PropertyDetails(
-    property: Property,
-) {
+fun PropertyDetailsFav(property: Property, context: Context) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US).apply {
         maximumFractionDigits = 0
     }
@@ -151,7 +129,7 @@ fun PropertyDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = formattedPrice,
+                text = formattedPrice, // Dynamic price display
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -191,23 +169,29 @@ fun PropertyDetails(
             text = "${property.street}, ${property.city}, ${property.state}",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = Color.Black,
-                fontSize = 16.sp),
+                fontSize = 16.sp
+            ),
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        // Use the RequestTourButton composable here
+        Box(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(0.dp)
+        ) {
+            RequestTourButton(
+                phoneNumber = property.phone_number,
+                modifier = Modifier.padding(0.dp))
+        }
     }
-}
-
-@Composable
-fun mockPropertyViewModel(): PropertyViewModel {
-    // This requires that you can instantiate PropertyViewModel with mock dependencies
-    return PropertyViewModel(LocalContext.current)
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PropertyPreviewPreview() {
+fun PropertyPreviewFavPreview() {
     val mockViewModel = mockPropertyViewModel()
 
-    PropertyPreview(
+    PropertyPreviewFav(
         propertyViewModel = mockViewModel,
         property = Property(
             pid = "1",
@@ -219,7 +203,7 @@ fun PropertyPreviewPreview() {
             city = "Sample City",
             state = "CA",
             zipcode = "12345",
-            image_urls = listOf("https://via.placeholder.com/600x300") // Sample image URL
+            thumbnail_url = "https://via.placeholder.com/600x300"
         ),
         onClick = {}
     )

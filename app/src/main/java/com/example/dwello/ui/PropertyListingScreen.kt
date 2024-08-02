@@ -1,6 +1,10 @@
 package com.example.dwello.ui
 
 import android.util.Log
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,13 +16,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,8 +52,13 @@ import coil.request.ImageRequest
 import com.example.dwello.R
 import com.example.dwello.data.Property
 import com.example.dwello.ui.components.ImageSlider
+import com.example.dwello.ui.components.RequestTourButton
+import com.example.dwello.ui.components.handlePhoneCall
+import com.example.dwello.ui.components.makePhoneCall
+import com.example.dwello.ui.components.mockPropertyViewModel
 import com.example.dwello.ui.theme.DwelloTheme
 import com.example.dwello.ui.theme.*
+import com.example.dwello.viewmodel.PropertyViewModel
 import com.google.firebase.Timestamp
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -57,7 +71,11 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun PropertyListingScreen(navController: NavController, property: Property) {
+fun PropertyListingScreen(
+    navController: NavController,
+    property: Property,
+    propertyViewModel: PropertyViewModel
+) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(listState) {
@@ -66,6 +84,8 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                 Log.d("PropertyListingScreen", "Scroll offset: $offset")
             }
     }
+
+    val isFavourited by propertyViewModel.isPropertyFavourited(property.pid).collectAsState()
 
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US).apply {
         maximumFractionDigits = 0
@@ -93,39 +113,6 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
             item {
                 // Display the image slider with swipe functionality
                 ImageSlider(property.image_urls, 300)
-//                Box {
-//                    AsyncImage(
-//                        model = ImageRequest.Builder(LocalContext.current)
-//                            .data(property.thumbnail_url)
-//                            .crossfade(true)
-//                            .build(),
-//                        placeholder = painterResource(R.drawable.loading_img), // Loading image while loading
-//                        error = painterResource(R.drawable.ic_broken_image), // Error image if load fails
-//                        contentDescription = null,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(300.dp),
-//                        contentScale = ContentScale.Crop
-//                    )
-//
-//                    // Image Indicator
-//                    Box(
-//                        modifier = Modifier
-//                            .align(Alignment.BottomCenter)
-//                            .padding(8.dp)
-//                            .background(
-//                                color = Color(0x66000000),
-//                                shape = RoundedCornerShape(12.dp)
-//                            )
-//                            .padding(horizontal = 8.dp, vertical = 4.dp)
-//                    ) {
-//                        Text(
-//                            text = "1/${property.image_urls.size}",
-//                            color = Color.White,
-//                            style = MaterialTheme.typography.bodyMedium
-//                        )
-//                    }
-//                }
             }
 
             item {
@@ -225,8 +212,24 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                                 .height(32.dp)
                                 .padding(14.dp, 0.dp)
                         ) {
+                            val context = LocalContext.current
+                            var showDialog by remember { mutableStateOf(false) }
+
+                            val callPermissionLauncher = rememberLauncherForActivityResult(
+                                contract = ActivityResultContracts.RequestPermission(),
+                                onResult = { isGranted ->
+                                    if (isGranted) {
+                                        makePhoneCall(context, property.phone_number)
+                                    } else {
+                                        Toast.makeText(context, "Permission denied to make calls", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            )
+
                             TextButton(
-                                onClick = { /* TODO: Handle learn more action */ },
+                                onClick = {
+                                    showDialog = true
+                                },
                                 contentPadding = PaddingValues(0.dp),
                                 modifier = Modifier
                                     .padding(0.dp)
@@ -244,6 +247,14 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                                     )
                                 )
                             }
+
+                            handlePhoneCall(
+                                context = context,
+                                phoneNumber = property.phone_number,
+                                callPermissionLauncher = { callPermissionLauncher.launch(Manifest.permission.CALL_PHONE) },
+                                showDialog = showDialog,
+                                setShowDialog = { showDialog = it }
+                            )
                         }
                     }
 
@@ -300,23 +311,10 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                     .background(Color.Gray)
                     .align(Alignment.TopCenter)
             )
-            Button(
-                onClick = { /* TODO: Handle request a tour action */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Red100),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Text(
-                    text = "Request a tour",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                )
-            }
+            RequestTourButton(
+                phoneNumber = property.phone_number,
+                modifier = Modifier.padding(16.dp)
+            )
         }
 
         // Top Bar
@@ -334,7 +332,7 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .height(60.dp)
                 .padding(0.dp, 0.dp)
                 .background(backgroundColor)
                 .align(Alignment.TopCenter)
@@ -343,7 +341,7 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp, 6.dp)
+                    .padding(14.dp, 6.dp, 14.dp, 0.dp)
                     .height(54.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -352,7 +350,11 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                     onClick = {
                         Log.d("PropertyListingScreen", "Back button clicked")
                         navController.popBackStack()
-                    }
+                    },
+                    modifier = Modifier
+                        .size(34.dp)
+                        .padding(0.dp)
+                        .background(TransparentWhite, shape = RoundedCornerShape(50))
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
@@ -363,14 +365,22 @@ fun PropertyListingScreen(navController: NavController, property: Property) {
                 }
                 IconButton(
                     onClick = {
-                        Log.d("PropertyListingScreen", "Favorite button clicked")
-                        // TODO: Handle favorite action
-                    }
+                        if (isFavourited) {
+                            propertyViewModel.removePropertyFromFavourites(property.pid)
+                        } else {
+                            propertyViewModel.addPropertyToFavourites(property.pid)
+                        }
+                        Log.d("PropertyListingScreen", "Favourite button clicked and Favourite status: $isFavourited")
+                    },
+                    modifier = Modifier
+                        .size(34.dp)
+                        .padding(0.dp)
+                        .background(TransparentWhite, shape = RoundedCornerShape(50))
                 ) {
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = contentColor,
+                        imageVector = if (isFavourited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isFavourited) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavourited) Red100 else contentColor,
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -418,6 +428,7 @@ fun PropertyListingScreenPreview() {
     DwelloTheme {
         // Creating a fake NavController for preview purposes
         val navController = rememberNavController()
+        val mockViewModel = mockPropertyViewModel() // Replace with a real or mock view model
 
         PropertyListingScreen(
             // Creating a fake NavController for preview purposes
@@ -445,7 +456,9 @@ fun PropertyListingScreenPreview() {
                 sqft = 3710,
                 thumbnail_url = "https://firebasestorage.googleapis.com/v0/b/dwello-b3d97.appspot.com/o/property_images%2F1-1.jpg?alt=media&token=68e4bc3e-f019-4949-81af-0c9785c4d956",
                 zipcode = "98008"
-            )
+            ),
+
+            mockViewModel
         )
     }
 }

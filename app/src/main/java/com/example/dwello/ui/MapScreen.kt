@@ -232,7 +232,7 @@ fun MapScreen(mapsViewModel: MapsViewModel,
                     .padding(bottom = 8.dp), // Adjust the padding to move it a bit up from the bottom
                 contentAlignment = Alignment.BottomCenter // Center the PropertyPreview at the bottom
             ) {
-                PropertyPreview(property = selectedProperty!!) {
+                PropertyPreview(propertyViewModel = propertyViewModel, property = selectedProperty!!) {
                     navController.navigate(Screen.PropertyListing.createRoute(selectedProperty!!.pid))
                 }
             }

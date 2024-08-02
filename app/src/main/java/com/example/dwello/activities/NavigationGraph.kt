@@ -155,7 +155,7 @@ fun NavigationHost(
             HomeScreen(mapsViewModel, propertyViewModel, navController)
         }
         composable(Screen.Favourites.route) {
-            FavouritesScreen()
+            FavouritesScreen(propertyViewModel, navController)
         }
         composable(Screen.Account.route) {
             AccountScreen(authViewModel, navController, propertyViewModel)
@@ -200,7 +200,7 @@ fun NavGraphBuilder.propertyNavGraph(
         val propertyId = backStackEntry.arguments?.getString("propertyId")
         val property = propertyViewModel.getPropertyById(propertyId)
         property?.let {
-            PropertyListingScreen(navController, it)
+            PropertyListingScreen(navController, it, propertyViewModel)
         }
     }
 }
