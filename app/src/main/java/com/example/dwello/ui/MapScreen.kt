@@ -94,6 +94,14 @@ fun MapScreen(mapsViewModel: MapsViewModel,
         }
     }
 
+    // Re-center the camera on the selected place's location
+    val selectedPlace by mapsViewModel.selectedPlace
+    LaunchedEffect(selectedPlace) {
+        selectedPlace?.latLng?.let { latLng ->
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, defaultZoomLevel)
+        }
+    }
+
     var isLayersButtonBlinking by remember { mutableStateOf(false) }
     var isLocationButtonBlinking by remember { mutableStateOf(false) }
 
